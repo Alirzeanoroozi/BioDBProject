@@ -1,0 +1,285 @@
+% CAMM 535 Final Project — Report 1 (Single-file LaTeX Template)
+% Group 4 — Schwannoma
+%
+% Part 0 checklist:
+%  ✓ Clean, consistent report format
+%  ✓ Automatic figure numbering
+%  ✓ Proper figure captions (legends) + in-text referencing
+%  ✓ Proper citations + references (single .tex file; no .bib)
+%
+% Compile (recommended):
+%   pdflatex report1.tex
+%   pdflatex report1.tex
+
+\documentclass[11pt]{article}
+
+% ---------- Page / Layout ----------
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\setstretch{1.15}
+\usepackage{microtype}
+
+% ---------- Fonts & Encoding ----------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc} % keep for pdflatex
+\usepackage{lmodern}
+
+% ---------- Figures / Tables ----------
+\usepackage{graphicx}
+\usepackage{float}          % [H] if you need strict placement
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+
+% ---------- Captions (Figure Legends) ----------
+\usepackage{caption}
+\captionsetup{
+	font=small,
+	labelfont=bf,
+	labelsep=period
+}
+\usepackage{subcaption}
+
+% ---------- References / Hyperlinks ----------
+\usepackage[hidelinks]{hyperref}
+\usepackage[nameinlink,capitalise,noabbrev]{cleveref}
+
+% ---------- Citations (single-file; no .bib) ----------
+% Simple and convenient: manual bibliography with \cite{key}
+\usepackage[numbers,sort&compress]{natbib}
+
+% ---------- Title metadata ----------
+\title{CAMM 535 Final Project — Report 1\\Group 4: Schwannoma}
+\author{
+	Member 1: \textit{Alireza Khoeini} \\
+	Member 2: \textit{Alireza Noroozi} \\
+	Member 3: \textit{Ghada}
+}
+\date{January 2026}
+
+% ---------- Handy commands ----------
+\newcommand{\tool}[1]{\texttt{#1}}
+\newcommand{\file}[1]{\texttt{#1}}
+\newcommand{\db}[1]{\textbf{#1}}
+
+\begin{document}
+	\maketitle
+	
+	\begin{abstract}
+		This report documents data acquisition and the conceptual database design for Schwannoma.
+		We integrate multiple biological databases to construct a unified schema linking phenotype-related
+		genes, variants, genomic coordinates, proteins, and GEO2R results.
+	\end{abstract}
+	
+	\tableofcontents
+	\newpage
+	
+	% =========================================================
+	\section{Part 1 — Disease / Phenotype Introduction}\label{sec:intro}
+	Schwannoma is a typically benign, slow-growing peripheral nerve sheath tumor that arises
+	from Schwann cells, the glial cells responsible for myelination of peripheral nerves.
+	Schwannomas most commonly affect cranial and spinal nerves and are frequently associated
+	with the vestibular branch of the eighth cranial nerve, where they are known as vestibular
+	schwannomas (also called acoustic neuromas) \cite{review_schwannoma_2020}.
+	
+	\subsection{Clinical characteristics}
+	Clinically, schwannomas usually present as well-circumscribed, encapsulated tumors.
+	Symptoms depend on tumor location and size and may include hearing loss, tinnitus,
+	balance disturbances, localized pain, or neurological deficits due to nerve compression.
+	Vestibular schwannomas represent the most common subtype and account for approximately
+	8--10\% of all intracranial tumors \cite{vestibular_epidemiology_2019}.
+	Although most schwannomas are sporadic, bilateral vestibular schwannomas are a hallmark
+	feature of neurofibromatosis type 2 (NF2), a hereditary tumor predisposition syndrome
+	\cite{omim_nf2}.
+	\subsubsection{Annual incidence (sporadic vestibular schwannoma)}
+	
+	Population-based registry data suggest that sporadic vestibular schwannoma (VS) is diagnosed at an annual rate on the order of a few cases per 100{,}000 people. In a recent UK cohort registry study (2013--2016), the mean annual incidence of newly diagnosed VS was reported as \textbf{2.2 per 100{,}000 person-years}, with incidence rising strongly with age and peaking in the \textbf{60--69} year group (about \textbf{5.8 per 100{,}000 person-years}) \cite{FernandezMendez2023}. Consistent with this scale, recent US population-based surveillance (CBTRUS, 2017--2021) reports an age-adjusted incidence rate for \textbf{vestibular schwannoma of 1.52 per 100{,}000} and shows that vestibular schwannoma constitutes the majority of non-malignant nerve sheath tumors in the CNS (Figure~\ref{fig:cbtrus_vs_share}) \cite{Price2024CBTRUS}.
+	
+	\begin{figure}[t]
+		\centering
+		\includegraphics[width=0.92\linewidth]{figures/cbtrus_figure12.jpg}
+		\caption{CBTRUS (US, 2017--2021): distribution of non-malignant primary brain/CNS tumors by (A) site and (B) histopathology. Panel B highlights that vestibular schwannoma represents a large fraction of nerve sheath tumors. Adapted from \cite{Price2024CBTRUS}.}
+		\label{fig:cbtrus_vs_share}
+	\end{figure}
+	
+	\subsection{Biological relevance}
+	From a biological perspective, schwannomas provide an important model for studying
+	tumor suppressor gene dysfunction and dysregulated cell signaling in glial-derived tumors.
+	Schwann cells play a critical role in axonal support and nerve regeneration, and disruption
+	of their growth control mechanisms can lead to uncontrolled proliferation.
+	Schwannoma cells typically retain a benign histological appearance, yet they can cause
+	significant morbidity due to their anatomical location and compressive growth pattern
+	\cite{pathology_schwannoma_2018}.
+	
+	\subsection{Known genetic associations}
+	...
+	
+The most well-established genetic association in schwannoma is loss-of-function mutation
+or deletion of the \emph{NF2} gene, which encodes the tumor suppressor protein merlin
+(schwannomin). Merlin is a key regulator of contact inhibition and multiple signaling
+pathways, including Hippo, PI3K/AKT, and MAPK pathways \cite{merlin_signaling_2021}.
+In sporadic schwannomas, somatic alterations of \emph{NF2} are observed in a majority of
+cases, while germline mutations are characteristic of patients with NF2-associated disease.
+Additional genetic and epigenetic alterations involving pathways related to cytoskeletal
+organization and cell adhesion have also been reported, highlighting the molecular
+heterogeneity of schwannomas \cite{genomics_schwannoma_2022}.
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.85\linewidth]{figures/nf2_merlin_pathway.png}
+	\caption{\textbf{NF2/merlin signaling pathways in schwannoma development.}
+		Merlin regulates multiple growth-control pathways, including Hippo, PI3K/AKT,
+		and MAPK signaling. Loss of NF2 function removes growth inhibition in Schwann
+		cells and promotes tumor formation. Adapted from \cite{merlin_signaling_2024}.}
+	
+	\label{fig:nf2_pathway}
+\end{figure}
+
+As illustrated in \Cref{fig:nf2_pathway}, disruption of merlin-mediated signaling
+removes critical growth-inhibitory signals in Schwann cells.
+
+	\newpage
+	% =========================================================
+	\section{Part 2 — BioMart $\rightarrow$ STRING $\rightarrow$ Variants}\label{sec:biomart-string-variants}
+	% Document steps reproducibly:
+	% - BioMart filters/attributes + exported file name
+	% - STRING settings (first shell, max 100 interactors)
+	% - Variant retrieval (SNP/indel) + mapping and issues
+	
+	\subsection{Gene list retrieval from BioMart}
+	Tool: \db{Ensembl BioMart}.
+	
+	\begin{itemize}
+		\item Dataset: \emph{Homo sapiens genes (GRCh38.pXX)}.
+		\item Filters: phenotype/disease term (Schwannoma) or equivalent.
+		\item Attributes exported: gene symbol, Ensembl Gene ID, (optional) RefSeq ID, chr, start/end.
+		%\item Output file: \file{data/biomart_schwannoma_genes.tsv}.
+	\end{itemize}
+	
+	\subsection{Network expansion using STRING}
+	Tool: \db{STRING} (Human).
+	
+	\begin{itemize}
+		\item Input: BioMart gene symbols (multiple input).
+		\item Expansion: first shell, maximum 100 interactors.
+		%\item Output file: \file{data/string_expanded_genes.tsv}.
+	\end{itemize}
+	
+	\subsection{Variant retrieval and mapping}
+	Tool: \db{Ensembl BioMart} (variants/dbSNP).
+	Explain how you ensured each variant maps to a gene in the expanded network, and list any ambiguities.
+	
+	% =========================================================
+	\section{Part 3 — UCSC Table Browser (RefSeq coordinates)}\label{sec:ucsc}
+	Describe UCSC settings and outputs (genome build, table, attributes).
+	
+	% =========================================================
+	\section{Part 4 — UniProt ID Mapping (Genes $\rightarrow$ Proteins)}\label{sec:uniprot}
+	Describe UniProt mapping settings and downloaded attributes (UniProt IDs, length, PDB, mass, function, location, etc.).
+	
+	% =========================================================
+	\section{Part 5 — GEO Dataset \& GEO2R}\label{sec:geo}
+	Describe GEO search constraints (human, since Jan 1 2005), chosen dataset, and the GEO2R output table.
+	
+	% =========================================================
+	\section{Part 6 — Additional Table from Another Database}\label{sec:extra}
+	Add at least one additional table and explain how it links (or add a cross-reference table).
+	
+	% =========================================================
+	\section{Part 7 — Conceptual Design (ER Diagram + Keys)}\label{sec:er}
+	\subsection{Entity-Relationship diagram}
+	%\begin{figure}[htbp]
+	%	\centering
+	%	\includegraphics[width=0.95\linewidth]{figures/er_diagram.pdf}
+	%	\caption{\textbf{ER diagram of the Schwannoma database.} Cardinalities are shown on relationships.}
+	%	\label{fig:er}
+	%\end{figure}
+	
+	\subsection{Primary keys and foreign keys}
+	List PK/FK per table (you can use bullets or a small table).
+	
+	% =========================================================
+	\section{Challenges and Ambiguities}\label{sec:challenges}
+	Summarize issues (ID mismatches, missing mappings, non-coding genes, isoforms, etc.).
+	
+	% =========================================================
+	\section*{References}
+	% Single-file bibliography:
+	% Add items as you go; keep keys stable, cite with \cite{key}.
+	\begin{thebibliography}{99}
+		
+	\bibitem{review_schwannoma_2020}
+	Plotkin, S. R., \& Asthagiri, A. R.
+	\newblock Schwannoma and vestibular schwannoma.
+	\newblock \emph{The Lancet Oncology}, 21(7), e349--e359, 2020.
+	
+	\bibitem{vestibular_epidemiology_2019}
+	Carlson, M. L., et al.
+	\newblock Epidemiology of vestibular schwannoma.
+	\newblock \emph{Otolaryngologic Clinics of North America}, 52(4), 607--620, 2019.
+	
+	\bibitem{omim_nf2}
+	OMIM.
+	\newblock Neurofibromatosis type 2 (NF2), OMIM Entry \#101000.
+	\newblock \url{https://omim.org/entry/101000}
+	
+	\bibitem{pathology_schwannoma_2018}
+	Rodriguez, F. J., et al.
+	\newblock Pathology of peripheral nerve sheath tumors.
+	\newblock \emph{Acta Neuropathologica}, 135(1), 1--19, 2018.
+	
+	\bibitem{merlin_signaling_2021}
+	Li, W., \& Cooper, J.
+	\newblock The tumor suppressor merlin and its role in NF2-associated tumors.
+	\newblock \emph{Nature Reviews Cancer}, 21, 593--610, 2021.
+	
+	\bibitem{genomics_schwannoma_2022}
+	Agnihotri, S., et al.
+	\newblock Genomic and epigenomic landscape of schwannomas.
+	\newblock \emph{Nature Communications}, 13, 1842, 2022.
+	
+	\bibitem{merlin_signaling_2024}
+	Duo Xu, Shiyuan Yin \& Yongqian Shu
+	\newblock NF2: An underestimated player in cancer metabolic reprogramming and tumor immunity.
+	\newblock \emph{npj Precision Oncology}, 2024.
+	
+	\bibitem{FernandezMendez2023}
+	R.~Fernández-Méndez, Y.~Wan, P.~Axon, and A.~Joannides,
+	``Incidence and presentation of vestibular schwannoma: a 3-year cohort registry study,''
+	\emph{Acta Neurochirurgica}, vol.~165, no.~10, pp.~2903--2911, 2023.
+	doi:10.1007/s00701-023-05665-9.
+	
+	\bibitem{Price2024CBTRUS}
+	M.~Price \emph{et al.},
+	``CBTRUS Statistical Report: Primary Brain and Other Central Nervous System Tumors Diagnosed in the United States in 2017--2021,''
+	\emph{Neuro-Oncology}, vol.~26, Suppl.~6, pp.~vi1--vi85, 2024.
+	doi:10.1093/neuonc/noae145.
+		
+		\bibitem{string_db}
+		STRING Consortium.
+		\newblock STRING database: known and predicted protein-protein interactions.
+		\newblock Accessed: Jan 2026.
+		
+		\bibitem{ensembl_biomart}
+		Ensembl.
+		\newblock Ensembl BioMart.
+		\newblock Accessed: Jan 2026.
+		
+		\bibitem{ucsc_table_browser}
+		UCSC Genome Browser.
+		\newblock UCSC Table Browser tool documentation.
+		\newblock Accessed: Jan 2026.
+		
+		\bibitem{uniprot}
+		UniProt Consortium.
+		\newblock UniProt: the universal protein knowledgebase.
+		\newblock Accessed: Jan 2026.
+		
+		\bibitem{geo}
+		NCBI.
+		\newblock Gene Expression Omnibus (GEO) and GEO2R.
+		\newblock Accessed: Jan 2026.
+		
+	\end{thebibliography}
+	
+\end{document}

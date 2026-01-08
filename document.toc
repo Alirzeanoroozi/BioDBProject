@@ -1,0 +1,17 @@
+\contentsline {section}{\numberline {1}Part 1 — Disease / Phenotype Introduction}{2}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Clinical characteristics}{2}{subsection.1.1}%
+\contentsline {subsubsection}{\numberline {1.1.1}Annual incidence (sporadic vestibular schwannoma)}{2}{subsubsection.1.1.1}%
+\contentsline {subsection}{\numberline {1.2}Biological relevance}{2}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Known genetic associations}{2}{subsection.1.3}%
+\contentsline {section}{\numberline {2}Part 2 — BioMart $\rightarrow $ STRING $\rightarrow $ Variants}{5}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Gene list retrieval from BioMart}{5}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Network expansion using STRING}{5}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Variant retrieval and mapping}{5}{subsection.2.3}%
+\contentsline {section}{\numberline {3}Part 3 — UCSC Table Browser (RefSeq coordinates)}{5}{section.3}%
+\contentsline {section}{\numberline {4}Part 4 — UniProt ID Mapping (Genes $\rightarrow $ Proteins)}{5}{section.4}%
+\contentsline {section}{\numberline {5}Part 5 — GEO Dataset \& GEO2R}{5}{section.5}%
+\contentsline {section}{\numberline {6}Part 6 — Additional Table from Another Database}{5}{section.6}%
+\contentsline {section}{\numberline {7}Part 7 — Conceptual Design (ER Diagram + Keys)}{6}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Entity-Relationship diagram}{6}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}Primary keys and foreign keys}{6}{subsection.7.2}%
+\contentsline {section}{\numberline {8}Challenges and Ambiguities}{6}{section.8}%
