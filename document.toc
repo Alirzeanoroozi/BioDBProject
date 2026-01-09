@@ -1,17 +1,29 @@
-\contentsline {section}{\numberline {1}Part 1 — Disease / Phenotype Introduction}{2}{section.1}%
-\contentsline {subsection}{\numberline {1.1}Clinical characteristics}{2}{subsection.1.1}%
-\contentsline {subsubsection}{\numberline {1.1.1}Annual incidence (sporadic vestibular schwannoma)}{2}{subsubsection.1.1.1}%
-\contentsline {subsection}{\numberline {1.2}Biological relevance}{2}{subsection.1.2}%
-\contentsline {subsection}{\numberline {1.3}Known genetic associations}{2}{subsection.1.3}%
-\contentsline {section}{\numberline {2}Part 2 — BioMart $\rightarrow $ STRING $\rightarrow $ Variants}{5}{section.2}%
-\contentsline {subsection}{\numberline {2.1}Gene list retrieval from BioMart}{5}{subsection.2.1}%
-\contentsline {subsection}{\numberline {2.2}Network expansion using STRING}{5}{subsection.2.2}%
-\contentsline {subsection}{\numberline {2.3}Variant retrieval and mapping}{5}{subsection.2.3}%
-\contentsline {section}{\numberline {3}Part 3 — UCSC Table Browser (RefSeq coordinates)}{5}{section.3}%
-\contentsline {section}{\numberline {4}Part 4 — UniProt ID Mapping (Genes $\rightarrow $ Proteins)}{5}{section.4}%
-\contentsline {section}{\numberline {5}Part 5 — GEO Dataset \& GEO2R}{5}{section.5}%
-\contentsline {section}{\numberline {6}Part 6 — Additional Table from Another Database}{5}{section.6}%
-\contentsline {section}{\numberline {7}Part 7 — Conceptual Design (ER Diagram + Keys)}{6}{section.7}%
-\contentsline {subsection}{\numberline {7.1}Entity-Relationship diagram}{6}{subsection.7.1}%
-\contentsline {subsection}{\numberline {7.2}Primary keys and foreign keys}{6}{subsection.7.2}%
-\contentsline {section}{\numberline {8}Challenges and Ambiguities}{6}{section.8}%
+\contentsline {section}{\numberline {1}Part 1 — Disease / Phenotype Introduction}{3}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Clinical characteristics}{3}{subsection.1.1}%
+\contentsline {subsubsection}{\numberline {1.1.1}Annual incidence (sporadic vestibular schwannoma)}{3}{subsubsection.1.1.1}%
+\contentsline {subsection}{\numberline {1.2}Biological relevance}{3}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Known genetic associations}{3}{subsection.1.3}%
+\contentsline {section}{\numberline {2}Part 2: Gene Selection and Variant Retrieval}{6}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Step 1: Identification of Schwannoma-Associated Genes Using BioMart}{6}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Step 2: Protein--Protein Interaction Expansion Using STRING}{6}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Step 3: Variant Retrieval Using Ensembl BioMart}{8}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Automated Variant Retrieval Script (Final Working Version)}{9}{subsection.2.4}%
+\contentsline {paragraph}{Procedure (end-to-end).}{9}{section*.9}%
+\contentsline {paragraph}{Functionality of major methods.}{10}{section*.10}%
+\contentsline {paragraph}{Final code used in the project.}{10}{section*.11}%
+\contentsline {section}{\numberline {3}Part 3: Genomic Coordinates and Transcript Annotation}{17}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Data Source and Genome Assembly}{19}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Input Identifiers}{19}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Selected Attributes}{20}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Transcript-Level Representation}{20}{subsection.3.4}%
+\contentsline {subsection}{\numberline {3.5}Output Format and Downstream Use}{20}{subsection.3.5}%
+\contentsline {section}{\numberline {4}Part 4 — UniProt ID Mapping (Genes $\rightarrow $ Proteins)}{21}{section.4}%
+\contentsline {section}{\numberline {5}Part 5 — GEO Dataset \& GEO2R}{21}{section.5}%
+\contentsline {section}{\numberline {6}Part 6 — Additional Table from Another Database}{21}{section.6}%
+\contentsline {section}{\numberline {7}Part 7 — Conceptual Design (ER Diagram + Keys)}{21}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Entity-Relationship diagram}{21}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}Primary keys and foreign keys}{21}{subsection.7.2}%
+\contentsline {section}{\numberline {8}Challenges and Ambiguities}{21}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Code Evolution and Rationale (Old vs. New Implementation)}{21}{subsection.8.1}%
+\contentsline {paragraph}{Old implementation (direct append approach).}{21}{section*.15}%
+\contentsline {paragraph}{New implementation (chunk files + merge + accurate tracking).}{23}{section*.17}%
