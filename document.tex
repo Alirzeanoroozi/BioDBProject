@@ -630,8 +630,16 @@ The resulting data were exported in tab-separated (TSV) format and later importe
 This transcript-level table serves as the genomic backbone for subsequent project components, enabling joins with variant data (Part~2) and protein-level annotations in later stages of the project.
 
 \section{Part 4 — UniProt ID Mapping (Genes $\rightarrow$ Proteins)}\label{sec:uniprot}
-Hello, here I am.
-Describe UniProt mapping settings and downloaded attributes (UniProt IDs, length, PDB, mass, function, location, etc.).
+I got the Ensembl Gene IDs from the previous part and used the UniProt website to map them to UniProt IDs.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.9\textwidth]{figures/ID_mapping.png}
+	\caption{ID mapping interface showing the mapping of Ensembl Gene IDs to UniProt IDs.}
+	\label{fig:id_mapping}
+\end{figure}
+
+Then I downloaded the data and saved it in a `idmapping.tsv` TSV file.
+Fortunately, there were not any missing genome that has not protein. and as mentioned in the documentation the columns are added.
 
 	% =========================================================
 	\section{Part 5 — GEO Dataset \& GEO2R}\label{sec:geo}
