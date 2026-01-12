@@ -633,7 +633,7 @@ This transcript-level table serves as the genomic backbone for subsequent projec
 I got the Ensembl Gene IDs from the previous part and used the UniProt website to map them to UniProt IDs.
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.9\textwidth]{figures/ID_mapping.png}
+	\includegraphics[width=0.9\textwidth]{figures/IDMapping_screenshot.png}
 	\caption{ID mapping interface showing the mapping of Ensembl Gene IDs to UniProt IDs.}
 	\label{fig:id_mapping}
 \end{figure}
@@ -646,9 +646,31 @@ Fortunately, there were not any missing genome that has not protein. and as ment
 	Describe GEO search constraints (human, since Jan 1 2005), chosen dataset, and the GEO2R output table.
 	
 	% =========================================================
-	\section{Part 6 — Additional Table from Another Database}\label{sec:extra}
-	Add at least one additional table and explain how it links (or add a cross-reference table).
-	
+\section{Part 6 — Additional Table from Another Database}\label{sec:extra}
+I got the AlphaFoldDB IDs from the previous part and used the CATH database to map them to CATH domains.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.9\textwidth]{figures/CathDatabase.png}
+	\caption{AlphaFoldDB CATH mapping interface showing the mapping of AlphaFoldDB IDs to CATH domains.}
+	\label{fig:alphafolddb_cath_mapping}
+\end{figure}
+
+Then I downloaded the data and saved it in a alphafold_cath.csv CSV file.
+\subsection{Integration of TED and AlphaFold Database}
+Recent advances in protein structure prediction, particularly through AlphaFold, have enabled the availability of millions of predicted protein structures. However, large-scale structural availability alone is not sufficient for understanding protein function, evolution, and modular organization. To address this, domain-level annotation frameworks such as the \textbf{Truncated Evolutionary Domain (TED)} database have been developed and integrated with structural classification systems like \textbf{CATH}, leveraging the AlphaFold Database (AFDB) as a structural backbone.
+\subsection{The Truncated Evolutionary Domain (TED) Database}
+TED is a domain-centric resource designed to identify and annotate \emph{evolutionary protein domains} directly from predicted protein structures. Unlike traditional domain databases that rely heavily on sequence similarity, TED operates primarily at the structural level, enabling the discovery of both known and previously uncharacterized domains.
+A key feature of TED is its ability to segment full-length protein structures into compact, evolutionarily meaningful domains, even in cases where sequence-based methods fail. This is particularly important for AlphaFold-predicted structures, which often contain long, multi-domain proteins with low sequence homology to known proteins. TED therefore enables large-scale, structure-driven domain discovery across proteomes.
+\subsection{CATH Structural Classification}
+CATH is a hierarchical protein domain classification system that organizes protein domains based on structural and evolutionary relationships. It categorizes domains into four principal levels: \emph{Class}, \emph{Architecture}, \emph{Topology}, and \emph{Homologous superfamily}. Each level captures increasingly specific structural and evolutionary features.
+CATH serves as a gold-standard reference for known protein domain families. However, its coverage has historically been limited by the availability of experimentally determined structures. The emergence of high-quality predicted structures from AlphaFold has significantly expanded the potential domain space that can be analyzed and classified.
+
+\subsection{Integration with AlphaFold Database (AFDB)}
+The AlphaFold Database provides predicted three-dimensional structures for entire proteomes at unprecedented scale. TED leverages AFDB by using AlphaFold-generated models as input, performing automated domain boundary detection on these structures. The resulting TED domains are then structurally compared against existing CATH domains.
+If a TED-identified domain matches a known CATH homologous superfamily, it can be assigned accordingly, effectively extending CATH annotations into the predicted structure space. Domains that do not match existing CATH families are retained as novel evolutionary domains, highlighting potential new folds or previously unrecognized domain families.
+This integration creates a powerful pipeline in which AFDB supplies large-scale structural data, TED performs structure-based domain segmentation, and CATH provides evolutionary classification and contextualization. Together, they enable comprehensive, proteome-wide domain annotation that bridges the gap between structure prediction and functional/evolutionary interpretation.
+\subsection{Impact and Applications}
+The TED--CATH--AFDB integration substantially expands the known domain universe and improves the annotation of multi-domain proteins, particularly in poorly characterized organisms. This framework is especially valuable for downstream applications such as protein function prediction, evolutionary analysis, and structure-guided machine learning models that operate at the domain level rather than full-length sequences.
 	% =========================================================
 	\section{Part 7 — Conceptual Design (ER Diagram + Keys)}\label{sec:er}
 	\subsection{Entity-Relationship diagram}
