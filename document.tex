@@ -671,19 +671,164 @@ If a TED-identified domain matches a known CATH homologous superfamily, it can b
 This integration creates a powerful pipeline in which AFDB supplies large-scale structural data, TED performs structure-based domain segmentation, and CATH provides evolutionary classification and contextualization. Together, they enable comprehensive, proteome-wide domain annotation that bridges the gap between structure prediction and functional/evolutionary interpretation.
 \subsection{Impact and Applications}
 The TED--CATH--AFDB integration substantially expands the known domain universe and improves the annotation of multi-domain proteins, particularly in poorly characterized organisms. This framework is especially valuable for downstream applications such as protein function prediction, evolutionary analysis, and structure-guided machine learning models that operate at the domain level rather than full-length sequences.
-	% =========================================================
-	\section{Part 7 — Conceptual Design (ER Diagram + Keys)}\label{sec:er}
-	\subsection{Entity-Relationship diagram}
-	%\begin{figure}[htbp]
-	%	\centering
-	%	\includegraphics[width=0.95\linewidth]{figures/er_diagram.pdf}
-	%	\caption{\textbf{ER diagram of the Schwannoma database.} Cardinalities are shown on relationships.}
-	%	\label{fig:er}
-	%\end{figure}
+
+\section{Part 7 — Conceptual Design (ER Diagram + Keys)}\label{sec:er}
+The conceptual design of the Schwannoma database integrates data from multiple biological databases to create a unified schema that links phenotype-related genes, genetic variants, genomic coordinates, protein annotations, protein interactions, structural domains, and gene expression data. The database follows a relational model with well-defined entities and relationships that preserve referential integrity across different data sources.
+\subsection{Entity-Relationship Diagram}
+
+The database schema consists of seven main entities (tables) with the following relationships:
+
+\begin{itemize}
+	\item \textbf{Genes} (central entity): Contains core gene information from Ensembl/BioMart. Each gene is uniquely identified by its Ensembl Gene Stable ID.
 	
-	\subsection{Primary keys and foreign keys}
-	List PK/FK per table (you can use bullets or a small table).
+	\item \textbf{Variants}: Stores genetic variants (SNPs and indels) from dbSNP associated with genes. Multiple variants can be associated with a single gene (one-to-many relationship: one gene to many variants).
 	
+	\item \textbf{Transcripts}: Contains RefSeq transcript-level genomic coordinates and exon structure from UCSC Table Browser. Multiple transcripts can be associated with a single gene symbol (one-to-many relationship: one gene to many transcripts).
+	
+	\item \textbf{Proteins}: Maps genes to their corresponding UniProt protein entries. Multiple proteins can be encoded by a single gene due to alternative splicing and isoform diversity (one-to-many relationship: one gene to many proteins).
+	
+	\item \textbf{STRING\_Interactions}: Represents protein--protein interactions from the STRING database. This is a many-to-many relationship between genes/proteins, where each interaction links two gene symbols.
+	
+	\item \textbf{AlphaFold\_CATH}: Contains structural domain annotations from AlphaFold and CATH databases, linked to proteins. Multiple structural domains (TEDs) can be associated with a single protein (one-to-many relationship: one protein to many domains).
+	
+	\item \textbf{GEO2R\_Results}: Stores differential gene expression analysis results from GEO2R. Each row represents expression data for a gene symbol (one-to-one or one-to-many relationship: one gene to one or more expression records).
+\end{itemize}
+
+\subsubsection{Cardinality Ratios}
+
+The cardinality ratios between entities are as follows:
+
+\begin{itemize}
+	\item \textbf{Genes $\rightarrow$ Variants}: One-to-Many (1:N). A single gene can have multiple associated variants, but each variant is associated with exactly one gene.
+	
+	\item \textbf{Genes $\rightarrow$ Transcripts}: One-to-Many (1:N). A single gene (identified by gene symbol) can have multiple transcript isoforms, but each transcript belongs to exactly one gene.
+	
+	\item \textbf{Genes $\rightarrow$ Proteins}: One-to-Many (1:N). A single gene can encode multiple protein isoforms, but each protein is encoded by exactly one gene.
+	
+	\item \textbf{Proteins $\rightarrow$ AlphaFold\_CATH}: One-to-Many (1:N). A single protein can contain multiple structural domains (TEDs), but each domain belongs to exactly one protein.
+	
+	\item \textbf{Genes $\leftrightarrow$ STRING\_Interactions}: Many-to-Many (M:N). Genes can interact with multiple other genes, and each interaction involves exactly two genes. This relationship is represented through a composite key in the interactions table.
+	
+	\item \textbf{Genes $\rightarrow$ GEO2R\_Results}: One-to-Many (1:N). A single gene can have multiple expression records (e.g., from different comparisons or time points), but each expression record corresponds to exactly one gene.
+\end{itemize}
+
+\subsection{Primary Keys and Foreign Keys}
+
+The following table summarizes the primary keys (PK) and foreign keys (FK) for each relation in the database:
+
+\begin{table}[H]
+	\centering
+	\small
+	\begin{tabular}{p{3cm}p{4cm}p{6cm}}
+		\toprule
+		\textbf{Table Name} & \textbf{Primary Key} & \textbf{Foreign Keys} \\
+		\midrule
+		\texttt{Genes} & \texttt{gene\_stable\_id} (Ensembl Gene Stable ID) & None (root entity) \\
+		\midrule
+		\texttt{Variants} & \texttt{variant\_id} (composite: \texttt{gene\_stable\_id}, \texttt{refsnp\_id}) & \texttt{gene\_stable\_id} $\rightarrow$ \texttt{Genes.gene\_stable\_id} \\
+		\midrule
+		\texttt{Transcripts} & \texttt{refseq\_accession} (RefSeq transcript accession, e.g., \texttt{NM\_*}, \texttt{XM\_*}) & \texttt{gene\_symbol} $\rightarrow$ \texttt{Genes.hgnc\_symbol} \\
+		\midrule
+		\texttt{Proteins} & \texttt{uniprot\_id} (UniProt Entry ID) & \texttt{ensembl\_gene\_id} $\rightarrow$ \texttt{Genes.gene\_stable\_id} \\
+		\midrule
+		\texttt{STRING\_Interactions} & \texttt{interaction\_id} (composite: \texttt{node1}, \texttt{node2}) & \texttt{node1} $\rightarrow$ \texttt{Genes.hgnc\_symbol}, \texttt{node2} $\rightarrow$ \texttt{Genes.hgnc\_symbol} \\
+		\midrule
+		\texttt{AlphaFold\_CATH} & \texttt{ted\_id} (TED domain identifier) & \texttt{uniprot\_acc} $\rightarrow$ \texttt{Proteins.uniprot\_id} \\
+		\midrule
+		\texttt{GEO2R\_Results} & \texttt{geo\_result\_id} (auto-increment) or composite: \texttt{gene\_symbol}, \texttt{comparison\_id} & \texttt{gene\_symbol} $\rightarrow$ \texttt{Genes.hgnc\_symbol} \\
+		\bottomrule
+	\end{tabular}
+	\caption{Primary keys and foreign keys for each table in the Schwannoma database.}
+	\label{tab:keys}
+\end{table}
+
+\subsubsection{Detailed Key Definitions}
+
+\paragraph{Genes Table}
+\begin{itemize}
+	\item \textbf{Primary Key}: \texttt{gene\_stable\_id} (VARCHAR) — Ensembl Gene Stable ID (e.g., \texttt{ENSG00000172915}). This is the central identifier that links to all other tables.
+	\item \textbf{Additional Unique Constraint}: \texttt{hgnc\_symbol} (VARCHAR) — HGNC gene symbol, used for linking to transcripts and interactions.
+\end{itemize}
+
+\paragraph{Variants Table}
+\begin{itemize}
+	\item \textbf{Primary Key}: Composite key consisting of \texttt{gene\_stable\_id} (VARCHAR) and \texttt{refsnp\_id} (VARCHAR, e.g., \texttt{rs123456}). This ensures uniqueness since the same variant can theoretically appear in multiple genes (though rare).
+	\item \textbf{Foreign Key}: \texttt{gene\_stable\_id} references \texttt{Genes.gene\_stable\_id} (ON DELETE CASCADE, ON UPDATE CASCADE).
+\end{itemize}
+
+\paragraph{Transcripts Table}
+\begin{itemize}
+	\item \textbf{Primary Key}: \texttt{refseq\_accession} (VARCHAR) — RefSeq transcript identifier (e.g., \texttt{NM\_001328648.1}, \texttt{XM\_047422550.1}).
+	\item \textbf{Foreign Key}: \texttt{gene\_symbol} (VARCHAR) references \texttt{Genes.hgnc\_symbol} (ON DELETE SET NULL, ON UPDATE CASCADE). Note: This uses gene symbol rather than Ensembl ID because UCSC RefSeq data is primarily linked via gene symbols.
+\end{itemize}
+
+\paragraph{Proteins Table}
+\begin{itemize}
+	\item \textbf{Primary Key}: \texttt{uniprot\_id} (VARCHAR) — UniProt Entry ID (e.g., \texttt{O75417}, \texttt{P42338}).
+	\item \textbf{Foreign Key}: \texttt{ensembl\_gene\_id} (VARCHAR) references \texttt{Genes.gene\_stable\_id} (ON DELETE CASCADE, ON UPDATE CASCADE).
+\end{itemize}
+
+\paragraph{STRING\_Interactions Table}
+\begin{itemize}
+	\item \textbf{Primary Key}: Composite key consisting of \texttt{node1} (VARCHAR) and \texttt{node2} (VARCHAR), where both are HGNC gene symbols. To ensure consistency, we enforce \texttt{node1} < \texttt{node2} lexicographically to avoid duplicate bidirectional entries.
+	\item \textbf{Foreign Keys}: 
+	\begin{itemize}
+		\item \texttt{node1} references \texttt{Genes.hgnc\_symbol} (ON DELETE CASCADE, ON UPDATE CASCADE)
+		\item \texttt{node2} references \texttt{Genes.hgnc\_symbol} (ON DELETE CASCADE, ON UPDATE CASCADE)
+	\end{itemize}
+\end{itemize}
+
+\paragraph{AlphaFold\_CATH Table}
+\begin{itemize}
+	\item \textbf{Primary Key}: \texttt{ted\_id} (VARCHAR) — Truncated Evolutionary Domain identifier (e.g., \texttt{AF-O75417-F1-model\_v4\_TED01}).
+	\item \textbf{Foreign Key}: \texttt{uniprot\_acc} (VARCHAR) references \texttt{Proteins.uniprot\_id} (ON DELETE CASCADE, ON UPDATE CASCADE).
+\end{itemize}
+
+\paragraph{GEO2R\_Results Table}
+\begin{itemize}
+	\item \textbf{Primary Key}: \texttt{geo\_result\_id} (INTEGER, auto-increment) or composite key of \texttt{gene\_symbol} and \texttt{comparison\_id} if multiple comparisons exist.
+	\item \textbf{Foreign Key}: \texttt{gene\_symbol} (VARCHAR) references \texttt{Genes.hgnc\_symbol} (ON DELETE CASCADE, ON UPDATE CASCADE).
+	\item \textbf{Additional Attributes}: Includes \texttt{logFC} (log fold change), \texttt{adj\_p\_value} (adjusted p-value), \texttt{p\_value}, and other GEO2R analysis metrics.
+\end{itemize}
+
+\subsubsection{Referential Integrity Constraints}
+
+To maintain data consistency, the following referential integrity constraints are enforced:
+
+\begin{itemize}
+	\item \textbf{Cascade Deletes}: When a gene is deleted from the \texttt{Genes} table, all associated variants, proteins, and GEO2R results are automatically deleted. Interactions involving the deleted gene are also removed.
+	
+	\item \textbf{Cascade Updates}: If an Ensembl Gene Stable ID or HGNC symbol is updated, all foreign key references are automatically updated to maintain consistency.
+	
+	\item \textbf{Set NULL on Delete}: For the \texttt{Transcripts} table, if a gene symbol is deleted, the \texttt{gene\_symbol} foreign key is set to NULL rather than deleting the transcript record, preserving transcript-level data even if gene mapping becomes unavailable.
+\end{itemize}
+
+\subsubsection{Additional Constraints}
+
+Beyond primary and foreign keys, the following constraints ensure data quality:
+
+\begin{itemize}
+	\item \textbf{CHECK Constraints}: 
+	\begin{itemize}
+		\item \texttt{Variants.chrom\_start} $\leq$ \texttt{Variants.chrom\_end}
+		\item \texttt{Transcripts.txStart} $\leq$ \texttt{Transcripts.txEnd}
+		\item \texttt{Transcripts.exonCount} $\geq$ 1
+		\item \texttt{Proteins.length} $>$ 0
+		\item \texttt{GEO2R\_Results.adj\_p\_value} $\geq$ 0 AND $\leq$ 1
+	\end{itemize}
+	
+	\item \textbf{UNIQUE Constraints}:
+	\begin{itemize}
+		\item \texttt{Genes.hgnc\_symbol} (if not NULL) must be unique
+		\item \texttt{Proteins.uniprot\_id} must be unique
+		\item \texttt{Transcripts.refseq\_accession} must be unique
+	\end{itemize}
+	
+	\item \textbf{NOT NULL Constraints}: Critical identifier fields such as \texttt{Genes.gene\_stable\_id}, \texttt{Variants.refsnp\_id}, \texttt{Proteins.uniprot\_id}, and \texttt{Transcripts.refseq\_accession} are enforced as NOT NULL.
+\end{itemize}
+
+This conceptual design provides a robust foundation for integrating multi-omics data related to schwannoma, enabling complex queries that span genomic, transcriptomic, proteomic, and expression domains.
+
 	% =========================================================
 	\section{Challenges and Ambiguities}\label{sec:challenges}
 		
