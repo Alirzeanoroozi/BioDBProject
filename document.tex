@@ -738,6 +738,12 @@ The TED--CATH--AFDB integration substantially expands the known domain universe 
 \section{Part 7 — Conceptual Design (ER Diagram + Keys)}\label{sec:er}
 The conceptual design of the Schwannoma database integrates data from multiple biological databases to create a unified schema that links phenotype-related genes, genetic variants, genomic coordinates, protein annotations, protein interactions, structural domains, and gene expression data. The database follows a relational model with well-defined entities and relationships that preserve referential integrity across different data sources.
 \subsection{Entity-Relationship Diagram}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.9\textwidth]{figures/ER_Diagram.png}
+	\caption{Entity-Relationship Diagram of the Schwannoma database.}
+	\label{fig:er_diagram}
+\end{figure}
 
 The database schema consists of seven main entities (tables) with the following relationships:
 
@@ -865,34 +871,6 @@ To maintain data consistency, the following referential integrity constraints ar
 	
 	\item \textbf{Set NULL on Delete}: For the \texttt{Transcripts} table, if a gene symbol is deleted, the \texttt{gene\_symbol} foreign key is set to NULL rather than deleting the transcript record, preserving transcript-level data even if gene mapping becomes unavailable.
 \end{itemize}
-
-\subsubsection{Additional Constraints}
-
-Beyond primary and foreign keys, the following constraints ensure data quality:
-
-\begin{itemize}
-	\item \textbf{CHECK Constraints}: 
-	\begin{itemize}
-		\item \texttt{Variants.chrom\_start} $\leq$ \texttt{Variants.chrom\_end}
-		\item \texttt{Transcripts.txStart} $\leq$ \texttt{Transcripts.txEnd}
-		\item \texttt{Transcripts.exonCount} $\geq$ 1
-		\item \texttt{Proteins.length} $>$ 0
-		\item \texttt{GEO2R\_Results.adj\_p\_value} $\geq$ 0 AND $\leq$ 1
-	\end{itemize}
-	
-	\item \textbf{UNIQUE Constraints}:
-	\begin{itemize}
-		\item \texttt{Genes.hgnc\_symbol} (if not NULL) must be unique
-		\item \texttt{Proteins.uniprot\_id} must be unique
-		\item \texttt{Transcripts.refseq\_accession} must be unique
-	\end{itemize}
-	
-	\item \textbf{NOT NULL Constraints}: Critical identifier fields such as \texttt{Genes.gene\_stable\_id}, \texttt{Variants.refsnp\_id}, \texttt{Proteins.uniprot\_id}, and \texttt{Transcripts.refseq\_accession} are enforced as NOT NULL.
-\end{itemize}
-
-This conceptual design provides a robust foundation for integrating multi-omics data related to schwannoma, enabling complex queries that span genomic, transcriptomic, proteomic, and expression domains.
-
-	% =========================================================
 	\section{Challenges and Ambiguities}\label{sec:challenges}
 		
 	\subsection{Code Evolution and Rationale (Old vs. New Implementation)}
@@ -1044,30 +1022,30 @@ This conceptual design provides a robust foundation for integrating multi-omics 
 	\emph{Neuro-Oncology}, vol.~26, Suppl.~6, pp.~vi1--vi85, 2024.
 	doi:10.1093/neuonc/noae145.
 		
-		\bibitem{string_db}
-		STRING Consortium.
-		\newblock STRING database: known and predicted protein-protein interactions.
-		\newblock Accessed: Jan 2026.
-		
-		\bibitem{ensembl_biomart}
-		Ensembl.
-		\newblock Ensembl BioMart.
-		\newblock Accessed: Jan 2026.
-		
-		\bibitem{ucsc_table_browser}
-		UCSC Genome Browser.
-		\newblock UCSC Table Browser tool documentation.
-		\newblock Accessed: Jan 2026.
-		
-		\bibitem{uniprot}
-		UniProt Consortium.
-		\newblock UniProt: the universal protein knowledgebase.
-		\newblock Accessed: Jan 2026.
-		
-		\bibitem{geo}
-		NCBI.
-		\newblock Gene Expression Omnibus (GEO) and GEO2R.
-		\newblock Accessed: Jan 2026.
+	\bibitem{string_db}
+	STRING Consortium.
+	\newblock STRING database: known and predicted protein-protein interactions.
+	\newblock Accessed: Jan 2026.
+	
+	\bibitem{ensembl_biomart}
+	Ensembl.
+	\newblock Ensembl BioMart.
+	\newblock Accessed: Jan 2026.
+	
+	\bibitem{ucsc_table_browser}
+	UCSC Genome Browser.
+	\newblock UCSC Table Browser tool documentation.
+	\newblock Accessed: Jan 2026.
+	
+	\bibitem{uniprot}
+	UniProt Consortium.
+	\newblock UniProt: the universal protein knowledgebase.
+	\newblock Accessed: Jan 2026.
+	
+	\bibitem{geo}
+	NCBI.
+	\newblock Gene Expression Omnibus (GEO) and GEO2R.
+	\newblock Accessed: Jan 2026.
 		
 	\end{thebibliography}
 	
