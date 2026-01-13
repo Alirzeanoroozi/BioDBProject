@@ -68,7 +68,7 @@
 \author{
 	Member 1: \textit{Alireza Khoeini} \\
 	Member 2: \textit{Alireza Noroozi} \\
-	Member 3: \textit{Ghada}
+	Member 3: \textit{Ghada Bahlul}
 }
 \date{January 2026}
 
@@ -641,10 +641,73 @@ I got the Ensembl Gene IDs from the previous part and used the UniProt website t
 Then I downloaded the data and saved it in a `idmapping.tsv` TSV file.
 Fortunately, there were not any missing genome that has not protein. and as mentioned in the documentation the columns are added.
 
-	% =========================================================
-	\section{Part 5 — GEO Dataset \& GEO2R}\label{sec:geo}
-	Describe GEO search constraints (human, since Jan 1 2005), chosen dataset, and the GEO2R output table.
-	
+\section{Part 5 — GEO Dataset \& GEO2R}\label{sec:geo}
+\subsection{GEO dataset search strategy}
+
+To identify gene expression datasets relevant to schwannoma, we created an advanced search in the NCBI Gene Expression Omnibus (GEO) database. The search contained the following criteria:
+
+\begin{itemize}
+  \item \textbf{Keyword:} Schwannoma
+  \item \textbf{Organism:} Homo sapiens
+  \item \textbf{Publication date:} January 1, 2005 to present
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figures/1.png}
+    \caption{Advanced GEO dataset search strategy for schwannoma-related human studies.}
+    \label{fig:geo_search}
+\end{figure}
+
+Among the resulting datasets, \textbf{GSE39645} was selected for downstream analysis due to its strong biological relevance and robust experimental design compatible with GEO2R.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figures/2.png}
+    \caption{GEO series overview for GSE39645: Microarray Analysis of Vestibular Schwannomas.}
+    \label{fig:gse39645_overview}
+\end{figure}
+
+\subsection{Description of GEO Dataset (GSE39645)}
+
+Schwannomas are benign tumors arising from Schwann cells and can develop along various peripheral and cranial nerves. Among these, \textit{vestibular schwannoma} is the most common and best-characterized subtype, originating from the vestibular branch of cranial nerve VIII. Vestibular schwannomas are associated with highly consistent molecular alterations, most notably the frequent inactivation of the \textit{NF2} tumor suppressor gene, which encodes the protein Merlin.
+
+The GEO dataset \textbf{GSE39645}, titled \textit{``Microarray Analysis in Vestibular Schwannomas''}, was selected for this study due to its strong biological relevance and well-defined experimental design. The dataset includes expression profiles from \textbf{31 vestibular schwannoma tumor samples} and \textbf{9 normal vestibular nerve control samples}, generated using the \textbf{Affymetrix Human Gene 1.0 ST microarray platform}.
+
+\subsection{GEO2R Analysis}
+
+Differential gene expression analysis was performed using the GEO2R web-based tool to compare vestibular schwannoma tumor samples with normal vestibular nerve controls in dataset GSE39645. GEO2R utilizes the \textit{limma} (Linear Models for Microarray Data) statistical framework to identify genes that are significantly differentially expressed between experimental groups.
+
+Samples were assigned to either the \textbf{tumor} or \textbf{control} group based on their metadata annotations.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figures/3.png}
+    \caption{GEO2R sample grouping and experimental design for GSE39645. 
+    This figure shows the GEO2R analysis interface for dataset GSE39645, where samples were grouped into tumor (vestibular schwannoma) and control (normal nerve and Schwann cell) categories prior to differential expression analysis. A total of 40 samples were included, consisting of 31 tumor samples and 9 normal control samples.}
+    \label{fig:geo2r_groups}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figures/4.png}
+    \caption{\textbf{GEO2R analysis settings used for differential expression analysis of GSE39645.}
+    This figure shows the GEO2R options panel used to analyze dataset GSE39645. P-values were adjusted for multiple hypothesis testing using the \textbf{Benjamini--Hochberg false discovery rate (FDR)} method. Log transformation of expression values was automatically detected by GEO2R, and NCBI-generated platform annotations were used for gene mapping. Genes with an \textbf{adjusted p-value $< 0.05$} were considered statistically significant.}
+    \label{fig:geo2r_settings}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=0.6\textheight]{figures/5.png}
+    \caption{\textbf{Volcano plot of differential gene expression in vestibular schwannoma (GSE39645).}
+    This volcano plot visualizes the results of the GEO2R differential expression analysis for dataset GSE39645, comparing vestibular schwannoma tumor samples to normal nerve controls. The x-axis represents the log$_2$ fold change in gene expression, while the y-axis shows the $-\log_{10}$(p-value). Genes with an adjusted p-value $< 0.05$ are highlighted, with up-regulated genes shown in red and down-regulated genes shown in blue.}
+    \label{fig:volcano}
+\end{figure}
+\subsection{GEO2R Differential Expression Results Table}
+
+Following the GEO2R analysis of dataset GSE39645, a comprehensive results table containing \textbf{all analyzed genes} was generated by the GEO2R interface and downloaded in \textbf{tab-separated values (TSV) format}. Instead of restricting the analysis to a ranked or pre-filtered subset, the full GEO2R output was retained to preserve complete transcriptome-wide differential expression information.
+
+The TSV results table includes key statistical metrics produced by the \textit{limma} framework, such as adjusted p-values (adj.P.Val), raw p-values (P.Value), moderated t-statistics (t), log$_2$ fold change (logFC), and gene-level annotations such as gene symbols and gene titles. Adjusted p-values were calculated using the Benjamini--Hochberg false discovery rate (FDR) method to correct for multiple hypothesis testing.
+
+This GEO2R results table functions as a central integration layer within the database. The \texttt{gene\_symbol} attribute will be used to link the differential expression results to other tables containing attributes like gene metadata, genomic coordinates, genetic variants, and protein annotations. 
+
 	% =========================================================
 \section{Part 6 — Additional Table from Another Database}\label{sec:extra}
 I got the AlphaFoldDB IDs from the previous part and used the CATH database to map them to CATH domains.
