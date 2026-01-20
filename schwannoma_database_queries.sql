@@ -588,19 +588,13 @@ LIMIT 100;
 -- Part 7(b): Retrieve UniProt IDs for genes with adj_p_value < 0.05
 SELECT DISTINCT
     geo.gene_symbol,
-    g.gene_name,
     p.uniprot_id,
-    geo.logFC,
-    geo.adj_p_value,
-    geo.p_value
 FROM 
     GEO2R_Results geo
     INNER JOIN Genes g ON geo.gene_symbol = g.hgnc_symbol
     INNER JOIN Proteins p ON g.gene_stable_id = p.ensembl_gene_id
 WHERE 
-    geo.adj_p_value < 0.05
-ORDER BY 
-    ABS(geo.logFC) DESC, geo.adj_p_value ASC;
+    geo.adj_p_value < 0.05;
 
 -- Part 7(b) Alternative: If using relaxed cutoff (adj_p_value < 0.1)
 SELECT DISTINCT
