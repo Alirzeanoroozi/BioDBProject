@@ -179,80 +179,81 @@
 		\label{fig:string-uniprot}
 	\end{figure}
 		STRING successfully matched 48 genes to Homo sapiens entries from the list submitted (Figure~\ref{fig:string-uniprot}).\newline
-		\begin{figure}[t]
+		\begin{figure}[H]
 			\centering
 			\includegraphics[width=0.4\linewidth]{figures/part8-3.png}
 			\caption{STRING derived protein-protein interaction network}
 			\label{fig:string-result}
 		\end{figure}
 		Nodes represent proteins and edges represent functional associations supported by experimental evidence, curated databases, co-expression, in addition to computational predictions. The network above (Figure~\ref{fig:string-result}) highlights interaction hubs and connectivity patterns from the gene set before downstream analysis and functional annotation in Cytoscape.
-		\begin{figure}[t]
+		\begin{figure}[H]
 			\centering
 			\includegraphics[width=0.4\linewidth]{figures/part8-4.png}
 			\caption{Export of STRING protein-protein interaction data in tabular format (short tabular text output)}
 			\label{fig:string-export}
 		\end{figure}
-		\newline This table (Figure~\ref{fig:string-export}) lists interacting protein pairs, corresponding accession identifiers, functional annotations, and interaction confidence scores.
+		 This table (Figure~\ref{fig:string-export}) lists interacting protein pairs, corresponding accession identifiers, functional annotations, and interaction confidence scores.
 		\subsection*{Cytoscape}
-		The protein-protein interaction table(Figure~\ref{fig:cytoescape-import}) exported from STRING was imported into Cytoscape using the Import Network from Table function. Interactions were defined as source (node 1) and target (node 2) protein pairs.
-		\begin{figure}
+		The protein-protein interaction table(Figure~\ref{fig:cytoescape-import}) exported from STRING was imported into Cytoscape using the Import Network from Table function. Interactions were defined as source (node 1) and target (node 2) protein pairs.\newline
+		\begin{figure}[H]
 			\centering
 			\includegraphics[width=0.7\linewidth]{figures/part8-5.png}
 			\caption{Import of STRING interaction data into Cytoscape.}
 			\label{fig:cytoescape-import}
 		\end{figure}
+		Nodes represent proteins encoded by the differentially expressed genes from part 7 and the edges represent known or predicted functional associations obtained from STRING(Figure~\ref{fig:cytoescape-visual1}).\newline
+		To improve the interpretation of the network, a force directed layout was applied to allow highly connected proteins to cluster in the center and less connected proteins to be positioned on the outside.
 		\begin{figure}
 			\centering
 			\includegraphics[width=0.4\linewidth]{figures/part8-6.png}
 			\caption{Cytoscape visualization of the STRING derived protein-protein interaction network)}
 			\label{fig:cytoescape-visual1}
 		\end{figure}
-		\begin{figure}
+		Differential expression attributes (gene symbol, UniProt entry, protein length, log fold change, and regulation status) were imported into Cytoscape as node table columns using the Import columns from Table function. Gene symbols were matched to the existing network nodes through the shared name key to ensure correct attribute mapping(Figure~\ref{fig:cytoescape-import2}).
+		\begin{figure}[H]
 			\centering
-			\includegraphics[width=0.7\linewidth]{figures/part8-7.png}
-			\caption{Cytoscape visualization of the STRING derived protein-protein interaction network}
-			\label{fig:cytoescape-import}
+			\includegraphics[width=0.3\linewidth]{figures/part8-8.png}
+			\caption{Import of differential expression attributes into the STRING derived PPI network in Cytoscape.}
+			\label{fig:cytoescape-import2}
 		\end{figure}
-		\begin{figure}
-			\centering
-			\includegraphics[width=0.7\linewidth]{figures/part8-8.png}
-			\caption{Import of STRING interaction data into Cytoscape.)}
-			\label{fig:cytoescape-import}
-		\end{figure}
-		\begin{figure}
+		\begin{figure}[H]
 			\centering
 			\includegraphics[width=0.7\linewidth]{figures/part8-9.png}
-			\caption{Import of STRING interaction data into Cytoscape.)}
-			\label{fig:cytoescape-import}
+			\caption{Final integrated Cytoscape Network.}
+			\label{fig:cytoescape-finalNet}
 		\end{figure}
-		\begin{figure}
-			\centering
-			\includegraphics[width=0.7\linewidth]{figures/part8-5.png}
-			\caption{Import of STRING interaction data into Cytoscape.)}
-			\label{fig:cytoescape-import}
-		\end{figure}
-		\begin{figure}
+		Node fill color represents the logFC values from the differential expression analysis, with red indicating upregulated genes and blue indicating down regulated genes. Color intensity reflects the magnitude of expression change(Figure~\ref{fig:cytoescape-logFc}).
+		\begin{figure}[H]
 			\centering
 			\includegraphics[width=0.7\linewidth]{figures/part8-10.png}
-			\caption{Import of STRING interaction data into Cytoscape.)}
-			\label{fig:cytoescape-import}
+			\caption{Visualization of differential gene expression in the PPI network using log fold change (logFC)}
+			\label{fig:cytoescape-logFc}
 		\end{figure}
-		\begin{figure}
+		Node fill colors were mapped to logFC values using a zero centered continuous gradient, with blue indicating negative logFC (downregulation), white represents no change, and red indicating positive logFC. The scale ranges from -1.69 to +1.69(Figure~\ref{fig:cytoescape-logFcColor}).
+		\begin{figure}[H]
 			\centering
 			\includegraphics[width=0.7\linewidth]{figures/part8-11.png}
-			\caption{Import of STRING interaction data into Cytoscape.)}
-			\label{fig:cytoescape-import}
+			\caption{Continuous color mapping used for log fold change visualization in the PPI network.}
+			\label{fig:cytoescape-logFcColor}
 		\end{figure}
-		\begin{figure}
+		Node size was mapped to protein length using a continuous scale with node sizes ranging from 10 to 30. Smaller nodes represent longer proteins. Longer proteins are shown as larger nodes. The protein length ranges from 132 (minimum) to 4599 (maximum) amino acids(Figure~\ref{fig:cytoescape-nodeSize}).
+		\begin{figure}[H]
 			\centering
-			\includegraphics[width=0.7\linewidth]{figures/part8-12.png}
-			\caption{Import of STRING interaction data into Cytoscape.)}
-			\label{fig:cytoescape-import}
+			\includegraphics[width=0.4\linewidth]{figures/part8-12.png}
+			\caption{Continuous node size mapping based on protein length.}
+			\label{fig:cytoescape-nodeSize}
 		\end{figure}
-		\begin{figure}
+		\begin{figure}[H]
 			\centering
 			\includegraphics[width=0.7\linewidth]{figures/part8-13.png}
-			\caption{Import of STRING interaction data into Cytoscape.)}
-			\label{fig:cytoescape-import}
+			\caption{Protein-protein interaction network with expression and protein length annotations.}
+			\label{fig:cytoescape-proLength}
 		\end{figure}
+		\begin{figure}[H]
+			\centering
+			\includegraphics[width=0.7\linewidth]{figures/part8-14.png}
+			\caption{Fully integrated protein-protein interaction (PPI) network visualization in Cytoscape.}
+			\label{fig:cytoescape-integratedVisual}
+		\end{figure}
+		This network (Figure~\ref{fig:cytoescape-integratedVisual}) represents known and predicted functional associations among differentially expressed genes from STRING. Nodes correspond to proteins and edges represent STRING supported interactions. Node color reflects differential expression (logFC), and node size is scaled according to protein length.
 \end{document}
