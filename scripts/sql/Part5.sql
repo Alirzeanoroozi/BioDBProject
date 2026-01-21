@@ -13,7 +13,7 @@ FROM
     LEFT JOIN Transcript t ON g.hgnc_symbol = t.name2
     LEFT JOIN geo2r geo ON g.hgnc_symbol = geo.gene_symbol
 WHERE 
-    g.hgnc_symbol = 'NBEA' # DCC , NF2, NBEA
+    g.hgnc_symbol = 'DCC' # DCC , NF2, NBEA
 ORDER BY 
 	t.exonCount DESC
 LIMIT 100;
