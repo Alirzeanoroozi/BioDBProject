@@ -74,207 +74,59 @@
 	\maketitle
 	\newpage
 	
-	\section*{Part 1: Recap of Report 1 and Project Objectives}
 	
 	% =========================================================
-	% Part 1 (Report 2): Recap of Report 1 (Objectives + Findings)
-	% Paste this into the empty Part 1 section of Report 2.
-	% (Assumes your preamble already loads graphicx, float, hyperref, etc.)
+	% Part 1 (Report 2): Recap of Report 1
+	% Text-only version (no figures)
 	% =========================================================
 	
-	\section{Part 1 --- Recap of Report 1: Objectives and Key Findings}
+	\section{Recap of Report 1: Objectives and Key Findings}
 	
-	\subsection{Overall objective of Report 1}
-	The first report established the biological motivation and the full data-acquisition pipeline for our Schwannoma
-	project, and translated that pipeline into a coherent conceptual database design.
-	The main goal was to build a unified, phenotype-centered dataset that connects:
-	(i) schwannoma-associated human genes, (ii) network-expanded genes based on protein--protein interactions,
-	(iii) short genetic variants (SNPs/indels) mapped to those genes, (iv) transcript-level genomic coordinates and exon
-	structure, (v) gene-to-protein mappings with functional protein attributes, and (vi) expression-level evidence from a
-	relevant GEO dataset (GEO2R results).
-	The outcome of Report 1 was therefore twofold:
-	\begin{enumerate}
-		\item a reproducible multi-database retrieval workflow (BioMart $\rightarrow$ STRING $\rightarrow$ BioMart variants $\rightarrow$ UCSC $\rightarrow$ UniProt $\rightarrow$ GEO/GEO2R),
-		\item a schema-ready set of tables (and intermediate TSV files) that support later physical design, testing, and visualization tasks required in the final project.
-	\end{enumerate}
 	
-	\subsection{Disease / phenotype context and motivation (Schwannoma)}
-	Schwannomas are typically benign tumors that arise from Schwann cells, often along peripheral or cranial nerves.
-	Even though they are not usually malignant, their location and compressive growth pattern can lead to significant
-	clinical morbidity. A major and well-studied genetic driver is disruption of the \textit{NF2} tumor suppressor gene,
-	which encodes merlin (schwannomin). Merlin participates in multiple growth-control pathways, including Hippo,
-	PI3K/AKT, and MAPK signaling, so loss of NF2 function is a biologically meaningful entry point for studying
-	schwannoma mechanisms and downstream pathway dysregulation.
+	This part presents a comprehensive summary of the first phase of the final project, which focused on the design and implementation of a reproducible biological data acquisition pipeline for the study of schwannoma. The primary objective of the first report was to collect, integrate, and organize heterogeneous biological data sources at the genomic, transcriptomic, and proteomic levels in a manner suitable for downstream database design, querying, and visualization.
 	
-	\begin{figure}[H]
-		\centering
-		\includegraphics[width=0.88\linewidth]{cbtrus_figure12.jpg}
-		\caption{Background epidemiology and distribution context (CBTRUS, 2017--2021) used in Report 1 to motivate schwannoma as a prevalent non-malignant nerve sheath tumor entity.}
-		\label{fig:cbtrus_context}
-	\end{figure}
+	\subsection*{Overall Objectives and Conceptual Framework}
 	
-	\begin{figure}[H]
-		\centering
-		\includegraphics[width=0.88\linewidth]{nf2_merlin_pathway.png}
-		\caption{Merlin (\textit{NF2}) signaling context summarized in Report 1. Merlin regulates multiple growth-control pathways; loss of merlin removes growth inhibition and promotes tumor formation.}
-		\label{fig:nf2_merlin}
-	\end{figure}
+	The first report adopted a disease-centered strategy rather than relying on a manually curated gene list. Schwannoma was selected as the target phenotype, and all subsequent data collection steps were driven by this disease context. The overarching goals were to identify schwannoma-associated genes, expand this gene set using biological interaction networks, retrieve genetic variation data at scale, incorporate transcript-level genomic structure, map genes to proteins, and identify relevant gene expression datasets. A key design principle was reproducibility, ensuring that every step could be rerun using public databases and stable identifiers.
 	
-	\subsection{Key data acquisition pipeline and findings}
+	\subsection*{Phenotype-Driven Gene Identification}
 	
-	\subsubsection{Step 1: Phenotype-driven gene identification using Ensembl BioMart}
-	We began with a phenotype-first strategy rather than a manually curated list.
-	Using Ensembl BioMart, we selected the \textbf{Human genes (GRCh38.p14)} dataset and applied the phenotype filter
-	\textbf{schwannoma}. From the resulting set of genes, we extracted core gene-level attributes needed for downstream
-	integration and database design, including:
-	\textit{Ensembl Gene Stable ID}, gene name, chromosome/scaffold, and genomic coordinates (start/end).
-	This step ensured that the initial gene list was grounded in Ensembl's phenotype annotation layer and provided a
-	clean identifier backbone (Ensembl stable IDs) for later joins.
+	The pipeline began with the identification of genes associated with schwannoma using Ensembl BioMart. The Human genes dataset based on the GRCh38.p14 assembly was queried using the phenotype filter \textit{schwannoma}. This approach avoided subjective gene selection and ensured that all retrieved genes were explicitly linked to the disease phenotype through Ensembl annotations. Core gene-level attributes were extracted, including Ensembl Gene Stable ID, gene name, chromosome or scaffold, and genomic start and end positions. Ensembl Gene Stable IDs were used as primary identifiers throughout the project, enabling reliable integration across multiple external data sources.
 	
-	\begin{figure}[H]
-		\centering
-		\includegraphics[width=0.92\linewidth]{biomart_gene_selection.png}
-		\caption{BioMart configuration used in Report 1 for phenotype-based schwannoma gene retrieval and selection of gene-level attributes.}
-		\label{fig:biomart_genes}
-	\end{figure}
+	\subsection*{Network-Based Gene Expansion}
 	
-	\paragraph{Finding (Step 1).}
-	The output of this step was a phenotype-associated schwannoma gene set in Ensembl identifiers, suitable as the
-	``seed'' list for interaction-based expansion and variant retrieval.
+	To capture broader biological context beyond directly phenotype-associated genes, the initial gene list was expanded using the STRING protein–protein interaction database. The Ensembl-derived gene list was submitted to STRING under the organism constraint \textit{Homo sapiens}. A full STRING network was constructed with all evidence channels enabled, including curated databases, experimental evidence, text mining, co-expression, neighborhood, gene fusion, and co-occurrence. A minimum interaction confidence score of 0.400 was applied, and expansion was restricted to the first interaction shell with a maximum of 100 interactors. This process resulted in a biologically coherent interaction network consisting of 72 nodes. The expanded gene set was treated as the definitive gene universe for all subsequent data collection steps.
 	
-	\subsubsection{Step 2: Interaction-based expansion using STRING}
-	The BioMart-derived gene list was used as input to the STRING database to expand the set using protein--protein
-	interaction (PPI) evidence. We used the \textbf{Multiple Proteins by Names / Identifiers} input mode and restricted
-	the organism to \textbf{\textit{Homo sapiens}}. We constructed a \textbf{full STRING network} (functional + physical
-	associations), enabled all evidence channels (text mining, experiments, curated databases, co-expression,
-	neighborhood, gene fusion, co-occurrence), and set the minimum interaction score to \textbf{medium confidence (0.400)}.
-	In accordance with the project requirement, we expanded using the \textbf{first shell} and capped the maximum number
-	of interactors at \textbf{100}.
+	\subsection*{Genetic Variant Retrieval}
 	
-	\begin{figure}[H]
-		\centering
-		\includegraphics[width=0.92\linewidth]{string_gene_input.png}
-		\caption{STRING multiple-protein input interface used in Report 1 (HGNC symbols).}
-		\label{fig:string_input}
-	\end{figure}
+	Following gene set finalization, genetic variation data associated with the expanded gene universe were retrieved using Ensembl BioMart. All genes were represented using Ensembl Gene Stable IDs to ensure compatibility with Ensembl variation resources. Variant data were queried from the \texttt{hsapiens\_snp} dataset and restricted to variants sourced from dbSNP. For each variant, attributes such as gene identifier, gene name, dbSNP reference ID, chromosome, genomic coordinates, allelic information, and UCSC identifiers were collected. These attributes were selected to support both biological interpretation and relational database design.
 	
-	\begin{figure}[H]
-		\centering
-		\includegraphics[width=0.92\linewidth]{string_hires_image.png}
-		\caption{High-resolution STRING interaction network visualization used in Report 1.}
-		\label{fig:string_network}
-	\end{figure}
+	\subsection*{Automated Large-Scale Variant Acquisition}
 	
-	\paragraph{Finding (Step 2).}
-	The resulting STRING-expanded network contained \textbf{72 nodes} and showed dense connectivity among genes involved
-	in pathways commonly implicated in tumor biology and schwannoma-associated signaling (including nodes consistent with
-	growth control, receptor signaling, and downstream kinase pathways). This expanded set became the definitive gene list
-	for variant retrieval and the subsequent database construction steps.
+	Due to BioMart browser limitations, including session timeouts and incomplete query results, an automated Python-based solution was developed. The workflow divided the gene list into small chunks, generated XML-based BioMart queries, and submitted them programmatically using HTTP POST requests. To improve robustness, multiple Ensembl BioMart mirrors were used with retry logic and logging. Each chunk was processed independently, written to a separate output file, and later merged into a single consolidated variant table with exactly one header preserved. Genes producing no variant records were explicitly tracked. Through extensive testing, a chunk size of four genes per query was identified as the most stable configuration. Although this approach required approximately 20 hours to complete, it successfully produced a complete and reproducible large-scale variant dataset.
 	
-	\subsubsection{Step 3: Variant retrieval from Ensembl BioMart (dbSNP; hsapiens\_snp dataset)}
-	After expansion, the STRING output was converted into \textbf{Ensembl Gene Stable IDs} to ensure compatibility with
-	Ensembl variant resources. We then queried Ensembl BioMart using the \textbf{hsapiens\_snp} dataset, restricting
-	variants to those sourced from \textbf{dbSNP} using:
-	\[
-	\texttt{variation\_source = dbSNP}.
-	\]
-	For each gene, we retrieved variant attributes that are directly usable for downstream joins and reporting:
-	\textit{Ensembl Gene Stable ID}, gene name, \textit{rsID} (dbSNP identifier), chromosome name, start/end positions,
-	alleles, and UCSC identifier (when available).
+	\subsection*{Transcript-Level Genomic Structure}
 	
-	\begin{figure}[H]
-		\centering
-		\includegraphics[width=0.92\linewidth]{biomart_variants.png}
-		\caption{BioMart attribute selection used in Report 1 for variant retrieval (dbSNP-filtered, hsapiens\_snp).}
-		\label{fig:biomart_variants}
-	\end{figure}
+	To enable exon-aware and transcript-centric analyses, transcript-level annotations were retrieved using the UCSC Table Browser. Queries were performed on the hg38 genome assembly using the NCBI RefSeq track and the \texttt{ncbiRefSeq} table. For each gene, all available transcripts were retrieved rather than selecting a single canonical transcript. Extracted attributes included transcript accession identifiers, chromosome, strand, transcript start and end positions, exon counts, exon start positions, exon end positions, and gene symbols. This strategy preserved alternative splicing information and avoided biases introduced by transcript selection.
 	
-	\paragraph{Finding (Step 3).}
-	Direct web-based BioMart queries were not reliable for large gene lists (timeouts, truncated responses, and session
-	termination), motivating an automated script-based approach for stable large-scale retrieval.
+	\subsection*{Gene–Protein Mapping}
 	
-	\subsubsection{Step 4 (automation result): Robust script-based variant acquisition at scale}
-	To make variant retrieval reproducible and resilient, Report 1 implemented an automated Python workflow that:
-	(i) chunks the gene list, (ii) rotates across multiple Ensembl BioMart mirrors with retries, (iii) checkpoints results
-	per chunk, then (iv) merges chunk outputs into a single TSV while preserving exactly one header.
-	In the final successful run, \textbf{CHUNK\_SIZE=4} was required for stability, and the full download took
-	\textbf{approximately 20 hours} due to BioMart throttling/rate limits and intermittent failures.
+	To link genomic information to protein-level data, gene identifiers were mapped to UniProt entries using the UniProt ID Mapping service. This mapping enabled integration of protein-centric attributes such as protein names, functional annotations, and cross-references to structural databases. The resulting gene–protein associations provide a critical bridge between genetic variation, transcript structure, and protein function within the database schema.
 	
-	\paragraph{Key output artifacts (Step 4).}
-	The automated workflow produced:
-	\begin{itemize}
-		\item \texttt{biomart\_variants.tsv} (merged final variant table),
-		\item \texttt{chunks/biomart\_variants\_chunk\_XXXX.tsv} (checkpointed partial results),
-		\item \texttt{missing\_gene\_ids.txt} (genes with no returned variant rows),
-		\item \texttt{run.log} (execution trace and failure diagnostics).
-	\end{itemize}
+	\subsection*{Expression Dataset Identification}
 	
-	\paragraph{Why this matters for Report 2.}
-	This component is central to the physical design and testing tasks in Report 2 because it defines a
-	high-volume, join-heavy table (variants) whose indexing, constraints, and performance properties will strongly affect
-	query correctness and runtime in later deliverables.
+	The final step of the first report involved identifying a relevant gene expression dataset for schwannoma. An advanced search of the Gene Expression Omnibus (GEO) was conducted using the keyword \textit{schwannoma}, restricted to \textit{Homo sapiens}, and limited to studies published from 2005 onward. Based on relevance and data quality, the dataset GSE39645 was selected. Although differential expression analysis was not performed at this stage, the dataset selection established the foundation for later GEO2R-based analysis and expression-level integration.
 	
-	\subsubsection{Part 3 of Report 1: Transcript-centric genomic coordinates (UCSC Table Browser; hg38.ncbiRefSeq)}
-	Report 1 retrieved transcript-level genomic annotations using UCSC Table Browser because the RefSeq track is
-	transcript-centric and provides detailed exon structure.
-	All UCSC queries were done on \textbf{hg38 (GRCh38)} with:
-	\textbf{Group: Genes and Gene Predictions}, \textbf{Track: NCBI RefSeq}, \textbf{Table: ncbiRefSeq}.
-	We used gene symbols (mapped from the Ensembl-based gene set) as identifiers and extracted fields necessary for exon
-	and coordinate modeling:
-	\texttt{name} (RefSeq transcript accession), \texttt{chrom}, \texttt{strand}, \texttt{txStart}, \texttt{txEnd},
-	\texttt{exonCount}, \texttt{exonStarts}, \texttt{exonEnds}, and \texttt{name2} (gene symbol).
-	Importantly, instead of selecting a single transcript per gene, we retained \textbf{all returned transcripts} to avoid
-	arbitrary transcript selection and to preserve alternative splicing information.
+	\subsection*{Protein Structure and Domain Resources (TED, CATH, and AlphaFoldDB).}
+	In Part~6 of the report, structural and domain-level information for proteins associated with the schwannoma gene set was incorporated using three complementary resources: TED, CATH, and AlphaFoldDB. The TED database was used to identify experimentally determined protein domain boundaries and structural classifications derived from known structures. CATH provided a hierarchical domain classification system, enabling the assignment of protein domains into Class, Architecture, Topology, and Homologous superfamily levels, which supports functional inference and evolutionary analysis. Since many proteins lack experimentally resolved structures, AlphaFoldDB was employed to supplement structural coverage by providing high-confidence predicted three-dimensional protein models generated using deep learning. Together, these resources enabled comprehensive structural annotation of proteins, allowing the project to bridge genomic and proteomic data with structural biology and to support future structure-aware analyses and visualization within the database framework.
 	
-	\begin{figure}[H]
-		\centering
-		\includegraphics[width=0.92\linewidth]{Final_Part7.png}
-		\caption{UCSC Table Browser configuration snapshot (hg38, RefSeq track, ncbiRefSeq table) used in Report 1.}
-		\label{fig:ucsc_config}
-	\end{figure}
+	\subsection*{Entity--Relationship Diagram and Database Constraints.}
+	In Part~7, the report describes the construction of an Entity--Relationship Diagram (ERD) to formally represent the structure of the biological database and to define the relationships among genes, variants, transcripts, proteins, and expression data. The ERD was designed to reflect the logical organization of the data acquisition pipeline and to ensure that all entities are connected through biologically meaningful relationships. Primary keys were defined for each entity to guarantee uniqueness, while foreign keys were introduced to enforce referential integrity across tables. Additional constraints, such as one-to-many and many-to-many relationships, were explicitly modeled to capture the multiplicity inherent in biological data, for example between genes and transcripts or genes and variants. These constraints play a critical role in preventing data inconsistency, supporting efficient querying, and ensuring that the physical database implementation accurately reflects the conceptual design established earlier in the project.
 	
-	\paragraph{Finding (UCSC transcript layer).}
-	The transcript table provides the ``genomic backbone'' for the database: it enables joins between gene-level entities
-	and variant coordinates while supporting transcript-aware questions (e.g., exon count constraints, exon boundary joins,
-	and transcript-specific structural reporting).
 	
-	\subsubsection{Part 4 of Report 1: Gene-to-protein mapping using UniProt}
-	To connect genetic identifiers to functional protein entities, Report 1 used UniProt's ID Mapping tool to map the
-	phenotype-related gene identifiers into \textbf{UniProt/SwissProt IDs}. The resulting mapping was saved (e.g.,
-	\texttt{idmapping.tsv}) and designed to support downstream analyses that require protein attributes such as protein
-	length, protein function descriptions, subcellular location, and structural references (e.g., PDB IDs).
+	\subsection*{Overall Outcomes}
 	
-	\subsubsection{Part 5 of Report 1: GEO dataset discovery and GEO2R groundwork}
-	Report 1 identified an expression dataset relevant to schwannoma by constructing an advanced search strategy in NCBI
-	GEO using:
-	\textbf{keyword: Schwannoma}, \textbf{organism: \textit{Homo sapiens}}, and a publication-date window
-	(\textit{Jan 1, 2005 to present}). From the candidate datasets, \textbf{GSE39645} was selected due to biological
-	relevance and compatibility with GEO2R-based differential expression analysis.
-	This established the foundation for later steps that require integrating log fold-changes and adjusted p-values into
-	the relational schema and performing phenotype-relevant filtering and visualization.
-	
-	\subsection{What Report 1 delivered to enable Report 2}
-	Report 1 produced the complete end-to-end blueprint and the core data files needed to proceed with physical design,
-	testing, and visualization:
-	\begin{enumerate}
-		\item A phenotype-driven gene list from BioMart (stable identifiers + coordinates).
-		\item A STRING-expanded PPI network (72 nodes) used to define the project gene universe.
-		\item A high-volume dbSNP variant dataset retrieved reproducibly via a robust, mirror-aware, chunked script.
-		\item Transcript-level RefSeq annotations (hg38.ncbiRefSeq) including exon structure.
-		\item UniProt mappings connecting genes to protein entities (supporting later protein-attribute joins).
-		\item A selected GEO dataset (GSE39645) and the plan to integrate GEO2R-derived statistics into the schema.
-	\end{enumerate}
-	
-	\paragraph{Summary of key findings.}
-	The main scientific/technical takeaways from Report 1 were:
-	(1) phenotype-first gene selection provides a reproducible starting point;
-	(2) STRING-based expansion adds biologically connected genes that better reflect pathway-level context;
-	(3) large-scale variant retrieval from BioMart requires robust automation (chunking, retries, mirror rotation, and
-	checkpointing), with \textbf{CHUNK\_SIZE=4} as a stable operating point for this project;
-	and (4) transcript-level modeling from UCSC avoids losing splice-isoform structure and better supports exon-aware
-	queries required later in the project.
-	
-	% End of Part 1 recap
+	In conclusion, the first report delivered a complete, end-to-end data acquisition and integration pipeline for schwannoma research. It produced a phenotype-driven and network-expanded gene set, a large-scale and reproducibly retrieved variant dataset, transcript-level genomic structure from UCSC, gene–protein mappings from UniProt, and a curated expression dataset from GEO. These outputs form the biological and technical foundation for the physical database design, testing, and visualization tasks addressed in the second phase of the project.
 	
 	\newpage
 	
@@ -309,6 +161,98 @@
 	\newpage
 	
 	\section*{Part 8: Protein Interaction Network Visualization}
-	% (Leave blank for now)
 	
+	\subsection*{STRING analysis}
+	Building on the differentially expressed gene set from part 7, we investigated these genes further by constructing a connected protein-protein interaction (PPI) network. UniProt accession IDs corresponding to the selected 49 genes were submitted to the STRING (Homo sapiens) database (v12.0). Known and predicted functional associations were retrieved after successful mapping of submitted UniProt identifiers. The resulting interaction network was imported into Cytoscape and visualized using a force-directed layout to emphasize connectivity patterns between highly interacting proteins. We integrated the differential expression information by mapping logFC values onto the network. Additionally, node size was scaled based on protein length such that longer proteins were represented by smaller nodes.
+	
+	\begin{figure}[t]
+		\centering
+		\includegraphics[width=0.4\linewidth]{figures/part8-1.png}
+		\caption{String input for protein-protein interaction analysis}
+		\label{fig:string-ppi-input}
+	\end{figure}
+
+	\begin{figure}[t]
+		\centering
+		\includegraphics[width=0.4\linewidth]{figures/part8-2.png}
+		\caption{Mapping of UniProt Identifiers in STRING}
+		\label{fig:string-uniprot}
+	\end{figure}
+		STRING successfully matched 48 genes to Homo sapiens entries from the list submitted (Figure~\ref{fig:string-uniprot}).\newline
+		\begin{figure}[t]
+			\centering
+			\includegraphics[width=0.4\linewidth]{figures/part8-3.png}
+			\caption{STRING derived protein-protein interaction network}
+			\label{fig:string-result}
+		\end{figure}
+		Nodes represent proteins and edges represent functional associations supported by experimental evidence, curated databases, co-expression, in addition to computational predictions. The network above (Figure~\ref{fig:string-result}) highlights interaction hubs and connectivity patterns from the gene set before downstream analysis and functional annotation in Cytoscape.
+		\begin{figure}[t]
+			\centering
+			\includegraphics[width=0.4\linewidth]{figures/part8-4.png}
+			\caption{Export of STRING protein-protein interaction data in tabular format (short tabular text output)}
+			\label{fig:string-export}
+		\end{figure}
+		\newline This table (Figure~\ref{fig:string-export}) lists interacting protein pairs, corresponding accession identifiers, functional annotations, and interaction confidence scores.
+		\subsection*{Cytoscape}
+		The protein-protein interaction table(Figure~\ref{fig:cytoescape-import}) exported from STRING was imported into Cytoscape using the Import Network from Table function. Interactions were defined as source (node 1) and target (node 2) protein pairs.
+		\begin{figure}
+			\centering
+			\includegraphics[width=0.7\linewidth]{figures/part8-5.png}
+			\caption{Import of STRING interaction data into Cytoscape.}
+			\label{fig:cytoescape-import}
+		\end{figure}
+		\begin{figure}
+			\centering
+			\includegraphics[width=0.4\linewidth]{figures/part8-6.png}
+			\caption{Cytoscape visualization of the STRING derived protein-protein interaction network)}
+			\label{fig:cytoescape-visual1}
+		\end{figure}
+		\begin{figure}
+			\centering
+			\includegraphics[width=0.7\linewidth]{figures/part8-7.png}
+			\caption{Cytoscape visualization of the STRING derived protein-protein interaction network}
+			\label{fig:cytoescape-import}
+		\end{figure}
+		\begin{figure}
+			\centering
+			\includegraphics[width=0.7\linewidth]{figures/part8-8.png}
+			\caption{Import of STRING interaction data into Cytoscape.)}
+			\label{fig:cytoescape-import}
+		\end{figure}
+		\begin{figure}
+			\centering
+			\includegraphics[width=0.7\linewidth]{figures/part8-9.png}
+			\caption{Import of STRING interaction data into Cytoscape.)}
+			\label{fig:cytoescape-import}
+		\end{figure}
+		\begin{figure}
+			\centering
+			\includegraphics[width=0.7\linewidth]{figures/part8-5.png}
+			\caption{Import of STRING interaction data into Cytoscape.)}
+			\label{fig:cytoescape-import}
+		\end{figure}
+		\begin{figure}
+			\centering
+			\includegraphics[width=0.7\linewidth]{figures/part8-10.png}
+			\caption{Import of STRING interaction data into Cytoscape.)}
+			\label{fig:cytoescape-import}
+		\end{figure}
+		\begin{figure}
+			\centering
+			\includegraphics[width=0.7\linewidth]{figures/part8-11.png}
+			\caption{Import of STRING interaction data into Cytoscape.)}
+			\label{fig:cytoescape-import}
+		\end{figure}
+		\begin{figure}
+			\centering
+			\includegraphics[width=0.7\linewidth]{figures/part8-12.png}
+			\caption{Import of STRING interaction data into Cytoscape.)}
+			\label{fig:cytoescape-import}
+		\end{figure}
+		\begin{figure}
+			\centering
+			\includegraphics[width=0.7\linewidth]{figures/part8-13.png}
+			\caption{Import of STRING interaction data into Cytoscape.)}
+			\label{fig:cytoescape-import}
+		\end{figure}
 \end{document}
