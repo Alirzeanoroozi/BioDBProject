@@ -569,5 +569,11 @@ WHERE
 		
 		\item \textbf{Conceptual vs. practical linkage: GEO2R to Genes.}
 		In the Report~1 ERD, we planned to connect \texttt{GEO2R\_Results} to \texttt{Genes} via HGNC gene symbols, which is conceptually reasonable. However, in practice, the available GEO2R outputs and the BioMart-derived gene identifiers did not provide a clean, complete overlap for reliable joining because the tables were produced from different sources/pipelines. This highlighted an important integration lesson: even when two tables share a ``similar'' identifier type in principle, cross-source datasets can differ in coverage and formatting, so link feasibility must be validated empirically early. As a result, we treated this join carefully during constraint definition and testing, and documented the limitation in the physical design discussion.
+			\begin{figure}[htbp]
+			\centering
+			\includegraphics[width=0.95\linewidth]{figures/erd_mysql.jpeg}
+			\caption{Final ERD exported from mysql.}
+			\label{fig:erd_final}
+		\end{figure}
 	\end{enumerate}
 \end{document}
