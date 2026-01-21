@@ -141,22 +141,215 @@
 	\newpage
 	
 	\section*{Part 4: Multi-Table SQL Queries}
-	% (Leave blank for now)
+	
+	In this part, we validated the logical integration of the database by writing multi-table SQL queries that simultaneously traverse genes, variants, expression data, transcripts, proteins, and structural annotations. These queries were designed directly from the conceptual questions in the project description and test whether the schema supports biologically meaningful questions across data modalities.
+	
+	\subsection*{Query 4.1: Genes with Variants and Differential Expression}
+	
+	The first multi-table query asks: \emph{Which schwannoma-associated genes have recorded variants and GEO2R-based differential expression, and how can we prioritize them by both mutational burden and expression change?} To answer this, we joined the \texttt{Genes}, \texttt{variants}, and \texttt{geo2r} tables using Ensembl Gene Stable IDs and HGNC symbols and summarized the number of distinct variants per gene together with log-fold change and adjusted $p$-values from GSE39645. We restricted the output to genes with at least one variant and non-null GEO2R statistics and sorted by decreasing variant count and absolute logFC to highlight potentially important genes.
+	
+	\begin{sqlcode}
+-- Query 4.1: Retrieve genes with their associated variants and GEO2R expression data
+
+SELECT DISTINCT
+    g.gene_stable_id,
+    g.hgnc_symbol,
+    COUNT(DISTINCT v.variant_name) AS variant_count,
+    geo.logFC,
+    geo.adj_p_value,
+    geo.p_value
+FROM 
+    Genes g
+    LEFT JOIN variants v ON g.gene_stable_id = v.gene_stable_id
+    LEFT JOIN geo2r geo ON g.hgnc_symbol = geo.gene_symbol
+WHERE 
+    geo.adj_p_value IS NOT NULL
+GROUP BY 
+    g.gene_stable_id, g.hgnc_symbol, g.gene_name, geo.logFC, geo.adj_p_value, geo.p_value
+HAVING 
+    COUNT(DISTINCT v.variant_name) > 0
+ORDER BY 
+    variant_count DESC, ABS(geo.logFC) DESC
+LIMIT 50;
+	\end{sqlcode}
+	
+	This query demonstrates that the database correctly links gene-level identifiers across variation and expression resources, enabling ranking of candidate schwannoma genes based on both mutation load and strength of dysregulation.
+	
+	\subsection*{Query 4.2: Proteins, Structural Domains, and Genes}
+	
+	The second query addresses the question: \emph{For which schwannoma-associated proteins do we have structural domain information from AlphaFold/CATH, and how many domains are annotated per protein?} Here, we joined \texttt{Genes}, \texttt{Proteins}, and \texttt{AlphaFoldCATH} using Ensembl IDs and UniProt/AlphaFold identifiers. For each protein, we counted distinct TED domain identifiers and concatenated their CATH labels. The results are ordered by decreasing domain count and protein length, returning the top 50 structurally rich proteins in the dataset.
+	
+	\begin{sqlcode}
+-- Query 4.2: Find proteins with their structural domains and associated genes
+
+SELECT 
+    g.hgnc_symbol,
+    p.Entry,
+    p.entry_name,
+    p.length AS protein_length,
+    p.pdb,
+    COUNT(DISTINCT ac.ted_id) AS domain_count,
+    GROUP_CONCAT(DISTINCT ac.cath_label SEPARATOR '; ') AS cath_labels
+FROM 
+    Genes g
+    INNER JOIN Proteins p ON g.gene_stable_id = p.ensmble_id
+    LEFT JOIN AlphaFoldCATH ac ON p.Entry = ac.Alphafold
+GROUP BY 
+    g.hgnc_symbol, p.Entry, p.entry_name, p.length, p.pdb
+HAVING 
+    COUNT(DISTINCT ac.ted_id) > 0
+ORDER BY 
+    domain_count DESC, protein_length DESC
+LIMIT 50;
+	\end{sqlcode}
+	
+	This query confirms that structural annotations have been successfully integrated with gene and protein records, allowing downstream analyses that relate domain architecture to disease relevance.
+	
+	\subsection*{Query 4.3: Transcripts, Exon Structure, and Expression}
+	
+	The third multi-table query asks: \emph{Which genes in our schwannoma gene universe have rich transcript structure (multiple RefSeq transcripts and exons) and are also significantly expressed according to GEO2R?} We linked \texttt{Genes}, \texttt{Transcript}, and \texttt{geo2r}, aggregated per gene the number of distinct RefSeq transcripts and summary statistics on exon counts (average, minimum, and maximum), and paired these with logFC and adjusted $p$-values.
+	
+	\begin{sqlcode}
+-- Query 4.3: Retrieve genes with transcript information and expression data
+
+SELECT 
+    g.hgnc_symbol,
+    g.Chromosome_scaffold,
+    COUNT(DISTINCT t.refseq_id) AS transcript_count,
+    AVG(t.exonCount) AS avg_exon_count,
+    MIN(t.exonCount) AS min_exon_count,
+    MAX(t.exonCount) AS max_exon_count,
+    geo.logFC,
+    geo.adj_p_value
+FROM 
+    Genes g
+    LEFT JOIN Transcript t ON g.hgnc_symbol = t.name2
+    LEFT JOIN geo2r geo ON g.hgnc_symbol = geo.gene_symbol
+WHERE 
+    geo.adj_p_value IS NOT NULL
+GROUP BY 
+    g.hgnc_symbol, g.Chromosome_scaffold, geo.logFC, geo.adj_p_value
+HAVING 
+    COUNT(DISTINCT t.refseq_id) > 0
+ORDER BY 
+    transcript_count DESC, ABS(geo.logFC) DESC
+LIMIT 50;
+	\end{sqlcode}
+	
+	This query illustrates how the schema supports exon-aware, transcript-centric views of differentially expressed genes and enables prioritization of genes with complex splicing patterns.
 	
 	\newpage
 	
 	\section*{Part 5: Integrated Query for Variations, Proteins, and Expression}
-	% (Leave blank for now)
+	
+	The objective of Part~5 is to write an integrated query that simultaneously retrieves variants, protein-level information, transcript structure, and expression changes for a user-specified gene of interest (for example, \texttt{NF2}, \texttt{DCC}, or \texttt{NBEA}). This tests both the correctness of join paths across all major entities and the usability of the schema for gene-centric exploration. The query below joins \texttt{genes}, \texttt{variants}, \texttt{proteins}, \texttt{Transcript}, and \texttt{geo2r} and filters on a specific HGNC symbol.
+	
+	\begin{sqlcode}
+SELECT 
+    g.hgnc_symbol AS gene_symbol,
+    v.variant_name,
+    p.pdb,
+    p.Entry AS uniprot_swissprot_id,
+    t.refseq_id,
+    t.exonCount AS exon_count,
+    geo.logFC
+FROM 
+    genes g
+    LEFT JOIN variants v ON g.gene_stable_id = v.gene_stable_id
+    LEFT JOIN proteins p ON g.gene_stable_id = p.ensmble_id
+    LEFT JOIN Transcript t ON g.hgnc_symbol = t.name2
+    LEFT JOIN geo2r geo ON g.hgnc_symbol = geo.gene_symbol
+WHERE 
+    g.hgnc_symbol = 'NBEA' -- e.g., DCC , NF2, NBEA
+ORDER BY 
+    t.exonCount DESC
+LIMIT 100;
+	\end{sqlcode}
+	
+	By changing the value of \texttt{g.hgnc\_symbol} in the \texttt{WHERE} clause, we can inspect the full variant catalogue, mapped protein IDs and PDB structures, transcript complexity, and expression logFC for any schwannoma-related gene present in the database.
+	the results for DCC iis with variants at the `data/part5_withVariants.csv` and for NF2 it has no variants but for NBEA it has many rows so we get timeouts. 
 	
 	\newpage
 	
 	\section*{Part 6: Query for Genes with PDB IDs and Exon Constraints}
-	% (Leave blank for now)
+	
+	The Part~6 question focuses on integrating structural and transcript information: \emph{Which genes have proteins with resolved PDB structures and at least a minimum number of exons in their RefSeq transcripts?} This type of query is useful for selecting candidates suitable for downstream structure-aware analyses, such as modeling exon-specific effects on protein domains. We addressed this by joining \texttt{Genes}, \texttt{proteins}, and \texttt{Transcript}, filtering for non-empty PDB entries and a minimum exon count threshold (here, at least four exons).
+	
+	\begin{sqlcode}
+SELECT DISTINCT
+    g.hgnc_symbol,
+    g.gene_stable_id,
+    p.Entry,
+    p.pdb,
+    t.refseq_id,
+    t.exonCount
+FROM 
+    Genes g
+    INNER JOIN proteins p ON g.gene_stable_id = p.ensmble_id
+    INNER JOIN Transcript t ON g.hgnc_symbol = t.name2
+WHERE 
+    p.pdb IS NOT NULL 
+    AND p.pdb != ''
+    AND t.exonCount >= 4
+ORDER BY 
+    t.exonCount DESC, g.hgnc_symbol
+LIMIT 100;
+	\end{sqlcode}
+	
+	The result set returns genes for which we have both experimentally resolved or curated structure information and sufficiently complex transcript structures, enabling targeted follow-up analyses.
 	
 	\newpage
 	
 	\section*{Part 7: GEO2R Analysis and Downstream Queries}
-	% (Leave blank for now)
+	
+	In Part~7, the goal is to demonstrate how GEO2R-derived differential expression results are integrated into the database and how they can be used to drive downstream queries. Specifically, the questions ask for (i) the number of significantly differentially expressed genes, (ii) the list of these genes, and (iii) how to connect these expression results back to proteins for further analysis. We implemented three SQL queries that operate on the \texttt{geo2r}, \texttt{Genes}, and \texttt{Proteins} tables.
+	
+	\subsection*{Query 7.1: Counting Significant Differentially Expressed Genes}
+	
+	The first query computes how many genes have an adjusted $p$-value below a significance threshold (here, $0.05$), providing a global summary of the GEO2R analysis.
+	
+	\begin{sqlcode}
+SELECT 
+    COUNT(DISTINCT gene_symbol) AS significant_gene_count
+FROM
+    geo2r
+WHERE 
+    adj_p_value < 0.05;
+	\end{sqlcode}
+	
+	\subsection*{Query 7.2: Listing Significant Genes}
+	
+	The second query returns the distinct gene symbols that pass the same adjusted $p$-value cutoff, which can be used as input for downstream analyses such as pathway enrichment or network construction.
+	
+	\begin{sqlcode}
+SELECT 
+    DISTINCT gene_symbol AS significant_genes
+FROM
+    geo2r
+WHERE 
+    adj_p_value < 0.05;
+	\end{sqlcode}
+	
+	\subsection*{Query 7.3: Linking Significant Genes to Proteins}
+	
+	The third query integrates GEO2R expression results with the \texttt{Genes} and \texttt{Proteins} tables to obtain UniProt entries, protein length, and regulation direction for significantly differentially expressed genes. This provides a direct bridge between expression changes and protein-level attributes.
+	
+	\begin{sqlcode}
+SELECT DISTINCT
+    geo.gene_symbol,
+    p.Entry,
+    p.Length,
+    geo.logFC,
+    geo.regulation
+FROM 
+    geo2r geo
+    INNER JOIN Genes g ON geo.gene_symbol = g.HGNC_symbol
+    INNER JOIN Proteins p ON g.Gene_stable_ID = p.ensmble_id
+WHERE 
+    geo.adj_p_value < 0.05;
+	\end{sqlcode}
+	
+	Together, these queries show how GEO2R output is not only stored but actively used to identify significant schwannoma genes, generate candidate lists, and connect transcriptional changes to protein features for further biological interpretation and visualization.
 	
 	\newpage
 	
