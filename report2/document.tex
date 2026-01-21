@@ -80,7 +80,7 @@
 	% Text-only version (no figures)
 	% =========================================================
 	
-	\section{Recap of Report 1: Objectives and Key Findings}
+	\section*{Recap of Report 1: Objectives and Key Findings}
 	
 	
 	This part presents a comprehensive summary of the first phase of the final project, which focused on the design and implementation of a reproducible biological data acquisition pipeline for the study of schwannoma. The primary objective of the first report was to collect, integrate, and organize heterogeneous biological data sources at the genomic, transcriptomic, and proteomic levels in a manner suitable for downstream database design, querying, and visualization.
@@ -130,17 +130,76 @@
 	
 	\newpage
 	
-	\section*{Part 2: Physical Database Design and Construction}
-	% (Leave blank for now)
+	% =========================================================
+	% Part 2 (30 pts) — Physical Construction (Tables + Loading)
+	% =========================================================
+	\section*{Physical Database Design and Construction (30 pts)}
+	
+	\subsection*{Construction workflow in MySQL Workbench}
+	All physical design and loading steps were performed using \textbf{MySQL Workbench} (GUI-based workflow). We started from the conceptual design (ERD and keys from Report~1) and then created the physical schema by importing each dataset table-by-table from flat files (CSV). Concretely, for each dataset we used Workbench's \textit{Table Data Import Wizard} to (i) select the source file, (ii) automatically infer column names and types, (iii) generate a corresponding raw table, and (iv) load the records into the created table. Figures~\ref{fig:part2_import_0} and~\ref{fig:part2_columns_1} illustrate this import-and-auto-generation process on a representative table (the same workflow was repeated for all tables).
+	
+	\begin{figure}[htbp]
+		\centering
+		\includegraphics[width=0.95\linewidth]{figures/part2_import_0.png}
+		\caption{MySQL Workbench table import wizard: selecting a destination and creating a new table automatically from a CSV source file.}
+		\label{fig:part2_import_0}
+	\end{figure}
+	
+	\begin{figure}[htbp]
+		\centering
+		\includegraphics[width=0.95\linewidth]{figures/part2_columns_1.png}
+		\caption{MySQL Workbench column inference step: automatic detection of column names and data types before generating the raw physical table.}
+		\label{fig:part2_columns_1}
+	\end{figure}
+	
+	\subsection*{Final schema and created relations}
+	After importing all datasets, the final schema contains the core entities designed in Report~1 and implemented as physical relations, including:
+	\texttt{Genes} (central entity), \texttt{Variants}, \texttt{Transcripts}, \texttt{Proteins}, \texttt{STRING\_Interactions}, \texttt{AlphaFold\_CATH}, and \texttt{GEO2R\_Results}. This matches the conceptual design in which \texttt{Genes} acts as the hub entity and other tables attach via gene identifiers or protein identifiers (1:N and M:N relationships represented through foreign keys and composite keys):contentReference[oaicite:0]{index=0}. The final database layout inside the schema is shown in Figure~\ref{fig:part2_Database_scheme}.
+	
+	\begin{figure}[htbp]
+		\centering
+		\includegraphics[width=0.98\linewidth]{figures/part2_Database_scheme.png}
+		\caption{Final database schema after importing all tables: the physical relations created and populated in the project schema.}
+		\label{fig:part2_Database_scheme}
+	\end{figure}
+	
+	\subsection{Applying SQL DDL (CREATE TABLE scripts)}
+	In addition to GUI-based import, we maintained an explicit DDL script (\texttt{get\_creation.sql}) containing the definitive \texttt{CREATE TABLE} statements. This script documents the physical design choices (data types, keys, and constraints) and ensures the database can be rebuilt reproducibly. In the report, we include screenshots for each table-creation/loading step (import wizard, inferred columns, and the final populated tables), as required.
+	\newpage
+	% ==========================================
+	% Part 3 (5 pts) — Constraints (Physical DB)
+	% ==========================================
+	\section*{Database Constraints in the Physical Design (5 pts)}
+	
+	The physical schema enforces data quality and relational consistency through a combination of \textbf{key constraints}, \textbf{referential integrity constraints}, and \textbf{domain-level constraints}. At the entity level, each table has a well-defined primary key: for example, \texttt{Genes} uses an Ensembl stable identifier as the primary key, while \texttt{Variants} and \texttt{STRING\_Interactions} use composite primary keys to guarantee uniqueness for relationship-like records:contentReference[oaicite:1]{index=1}. We also apply \textbf{unique constraints} where needed (e.g., gene symbols) to support stable joins when an external source primarily uses gene symbols rather than Ensembl IDs:contentReference[oaicite:2]{index=2}.
+	
+	For \textbf{foreign key constraints}, child tables reference parent identifiers to prevent orphan records and preserve the conceptual relationships defined in the ERD. Examples include linking variants and proteins back to \texttt{Genes}, linking structural domains back to \texttt{Proteins}, and linking expression results back to genes (gene symbol):contentReference[oaicite:3]{index=3}:contentReference[oaicite:4]{index=4}. We also specify \textbf{referential actions} to control how updates/deletes propagate: for many dependent tables we use \texttt{ON DELETE CASCADE} / \texttt{ON UPDATE CASCADE} to keep the database consistent when a parent identifier changes, while for transcript records we use a more conservative strategy (\texttt{SET NULL}) to preserve transcript-level data even if the gene mapping becomes unavailable:contentReference[oaicite:5]{index=5}. Finally, we enforce basic domain constraints such as \texttt{NOT NULL} on key columns, appropriate numeric types for genomic coordinates, and indexing of foreign key columns (for join performance), all of which are reflected in the DDL and in the Workbench constraint panels (Figures~\ref{fig:part3_PrimaryKey}--\ref{fig:part3_ForeignKey_sql}).
+	
+	\begin{figure}[htbp]
+		\centering
+		\includegraphics[width=0.95\linewidth]{figures/part3_PrimaryKey.png}
+		\caption{Defining primary keys in MySQL Workbench (GUI): enforcing entity uniqueness at the physical level.}
+		\label{fig:part3_PrimaryKey}
+	\end{figure}
+	
+	\begin{figure}[htbp]
+		\centering
+		\includegraphics[width=0.95\linewidth]{figures/part3_Foreignkey.png}
+		\caption{Defining foreign keys in MySQL Workbench (GUI): linking dependent tables to parent identifiers to enforce referential integrity.}
+		\label{fig:part3_Foreignkey}
+	\end{figure}
+	
+	\begin{figure}[htbp]
+		\centering
+		\includegraphics[width=0.95\linewidth]{figures/part3_ForeignKey_sql.png}
+		\caption{Generated SQL preview for a foreign key constraint (Workbench): shows the underlying \texttt{ALTER TABLE ... ADD CONSTRAINT ... FOREIGN KEY ...} statement and referential actions.}
+		\label{fig:part3_ForeignKey_sql}
+	\end{figure}
+	
 	
 	\newpage
 	
-	\section*{Part 3: Database Constraints}
-	% (Leave blank for now)
-	
-	\newpage
-	
-	\section*{Part 4: Multi-Table SQL Queries}
+	\section*{Multi-Table SQL Queries}
 	
 	In this part, we validated the logical integration of the database by writing multi-table SQL queries that simultaneously traverse genes, variants, expression data, transcripts, proteins, and structural annotations. These queries were designed directly from the conceptual questions in the project description and test whether the schema supports biologically meaningful questions across data modalities.
 	
@@ -175,6 +234,13 @@ LIMIT 50;
 	
 	This query demonstrates that the database correctly links gene-level identifiers across variation and expression resources, enabling ranking of candidate schwannoma genes based on both mutation load and strength of dysregulation.
 	
+	\begin{figure}[htbp]
+		\centering
+		\includegraphics[width=0.98\linewidth]{figures/part4_1.png}
+		\caption{Query 4.1 result}
+		\label{fig:part4_1}
+	\end{figure}
+	
 	\subsection*{Query 4.2: Proteins, Structural Domains, and Genes}
 	
 	The second query addresses the question: \emph{For which schwannoma-associated proteins do we have structural domain information from AlphaFold/CATH, and how many domains are annotated per protein?} Here, we joined \texttt{Genes}, \texttt{Proteins}, and \texttt{AlphaFoldCATH} using Ensembl IDs and UniProt/AlphaFold identifiers. For each protein, we counted distinct TED domain identifiers and concatenated their CATH labels. The results are ordered by decreasing domain count and protein length, returning the top 50 structurally rich proteins in the dataset.
@@ -204,7 +270,12 @@ LIMIT 50;
 	\end{sqlcode}
 	
 	This query confirms that structural annotations have been successfully integrated with gene and protein records, allowing downstream analyses that relate domain architecture to disease relevance.
-	
+	\begin{figure}[htbp]
+		\centering
+		\includegraphics[width=0.98\linewidth]{figures/part4_2.png}
+		\caption{Query 4.2 result}
+		\label{fig:part4_2}
+	\end{figure}
 	\subsection*{Query 4.3: Transcripts, Exon Structure, and Expression}
 	
 	The third multi-table query asks: \emph{Which genes in our schwannoma gene universe have rich transcript structure (multiple RefSeq transcripts and exons) and are also significantly expressed according to GEO2R?} We linked \texttt{Genes}, \texttt{Transcript}, and \texttt{geo2r}, aggregated per gene the number of distinct RefSeq transcripts and summary statistics on exon counts (average, minimum, and maximum), and paired these with logFC and adjusted $p$-values.
@@ -238,9 +309,16 @@ LIMIT 50;
 	
 	This query illustrates how the schema supports exon-aware, transcript-centric views of differentially expressed genes and enables prioritization of genes with complex splicing patterns.
 	
+	\begin{figure}[htbp]
+		\centering
+		\includegraphics[width=0.98\linewidth]{figures/part4_3.png}
+		\caption{Query 4.3 result}
+		\label{fig:part4_3}
+	\end{figure}
+	
 	\newpage
 	
-	\section*{Part 5: Integrated Query for Variations, Proteins, and Expression}
+	\section*{Integrated Query for Variations, Proteins, and Expression}
 	
 	The objective of Part~5 is to write an integrated query that simultaneously retrieves variants, protein-level information, transcript structure, and expression changes for a user-specified gene of interest (for example, \texttt{NF2}, \texttt{DCC}, or \texttt{NBEA}). This tests both the correctness of join paths across all major entities and the usability of the schema for gene-centric exploration. The query below joins \texttt{genes}, \texttt{variants}, \texttt{proteins}, \texttt{Transcript}, and \texttt{geo2r} and filters on a specific HGNC symbol.
 	
@@ -267,11 +345,18 @@ LIMIT 100;
 	\end{sqlcode}
 	
 	By changing the value of \texttt{g.hgnc\_symbol} in the \texttt{WHERE} clause, we can inspect the full variant catalogue, mapped protein IDs and PDB structures, transcript complexity, and expression logFC for any schwannoma-related gene present in the database.
-	the results for DCC iis with variants at the `data/part5_withVariants.csv` and for NF2 it has no variants but for NBEA it has many rows so we get timeouts. 
+	The results for DCC iis with variants at the `data/part5withVariants.csv` and for NF2 it has no variants but for NBEA it has many rows so we get timeouts. 
+	
+	\begin{figure}[htbp]
+		\centering
+		\includegraphics[width=0.98\linewidth]{figures/part5.png}
+		\caption{Query 5 result}
+		\label{fig:part5}
+	\end{figure}
 	
 	\newpage
 	
-	\section*{Part 6: Query for Genes with PDB IDs and Exon Constraints}
+	\section*{Query for Genes with PDB IDs and Exon Constraints}
 	
 	The Part~6 question focuses on integrating structural and transcript information: \emph{Which genes have proteins with resolved PDB structures and at least a minimum number of exons in their RefSeq transcripts?} This type of query is useful for selecting candidates suitable for downstream structure-aware analyses, such as modeling exon-specific effects on protein domains. We addressed this by joining \texttt{Genes}, \texttt{proteins}, and \texttt{Transcript}, filtering for non-empty PDB entries and a minimum exon count threshold (here, at least four exons).
 	
@@ -298,9 +383,15 @@ LIMIT 100;
 	
 	The result set returns genes for which we have both experimentally resolved or curated structure information and sufficiently complex transcript structures, enabling targeted follow-up analyses.
 	
+	\begin{figure}[htbp]
+		\centering
+		\includegraphics[width=0.98\linewidth]{figures/part6.png}
+		\caption{Query 6 result}
+		\label{fig:part6}
+	\end{figure}
 	\newpage
 	
-	\section*{Part 7: GEO2R Analysis and Downstream Queries}
+	\section*{GEO2R Analysis and Downstream Queries}
 	
 	In Part~7, the goal is to demonstrate how GEO2R-derived differential expression results are integrated into the database and how they can be used to drive downstream queries. Specifically, the questions ask for (i) the number of significantly differentially expressed genes, (ii) the list of these genes, and (iii) how to connect these expression results back to proteins for further analysis. We implemented three SQL queries that operate on the \texttt{geo2r}, \texttt{Genes}, and \texttt{Proteins} tables.
 	
@@ -316,7 +407,12 @@ FROM
 WHERE 
     adj_p_value < 0.05;
 	\end{sqlcode}
-	
+	\begin{figure}[htbp]
+		\centering
+		\includegraphics[width=0.98\linewidth]{figures/part7_a_0.png}
+		\caption{Query 7.1 result with 13028 rows. We did not use this for analysis in part 8 since it would be out of control.}
+		\label{fig:part7_1_1}
+	\end{figure}
 	\subsection*{Query 7.2: Listing Significant Genes}
 	
 	The second query returns the distinct gene symbols that pass the same adjusted $p$-value cutoff, which can be used as input for downstream analyses such as pathway enrichment or network construction.
@@ -329,7 +425,12 @@ FROM
 WHERE 
     adj_p_value < 0.05;
 	\end{sqlcode}
-	
+	\begin{figure}[htbp]
+		\centering
+		\includegraphics[width=0.98\linewidth]{figures/part7_a_1.png}
+		\caption{Query 7.1 result limited to first 100 genes.}
+		\label{fig:part7_1_2}
+	\end{figure}
 	\subsection*{Query 7.3: Linking Significant Genes to Proteins}
 	
 	The third query integrates GEO2R expression results with the \texttt{Genes} and \texttt{Proteins} tables to obtain UniProt entries, protein length, and regulation direction for significantly differentially expressed genes. This provides a direct bridge between expression changes and protein-level attributes.
@@ -350,10 +451,15 @@ WHERE
 	\end{sqlcode}
 	
 	Together, these queries show how GEO2R output is not only stored but actively used to identify significant schwannoma genes, generate candidate lists, and connect transcriptional changes to protein features for further biological interpretation and visualization.
-	
+	\begin{figure}[htbp]
+		\centering
+		\includegraphics[width=0.98\linewidth]{figures/part7_b.png}
+		\caption{Query 7.2 result.}
+		\label{fig:part7_2}
+	\end{figure}
 	\newpage
 	
-	\section*{Part 8: Protein Interaction Network Visualization}
+	\section*{Protein Interaction Network Visualization}
 	
 	\subsection*{STRING analysis}
 	Building on the differentially expressed gene set from part 7, we investigated these genes further by constructing a connected protein-protein interaction (PPI) network. UniProt accession IDs corresponding to the selected 49 genes were submitted to the STRING (Homo sapiens) database (v12.0). Known and predicted functional associations were retrieved after successful mapping of submitted UniProt identifiers. The resulting interaction network was imported into Cytoscape and visualized using a force-directed layout to emphasize connectivity patterns between highly interacting proteins. We integrated the differential expression information by mapping logFC values onto the network. Additionally, node size was scaled based on protein length such that longer proteins were represented by smaller nodes.
@@ -449,4 +555,19 @@ WHERE
 			\label{fig:cytoescape-integratedVisual}
 		\end{figure}
 		This network (Figure~\ref{fig:cytoescape-integratedVisual}) represents known and predicted functional associations among differentially expressed genes from STRING. Nodes correspond to proteins and edges represent STRING supported interactions. Node color reflects differential expression (logFC), and node size is scaled according to protein length.
+	\section*{Challenges Encountered During Physical Design and Loading}
+	
+	\begin{enumerate}
+		\item \textbf{TSV-to-CSV conversion for Workbench import.}
+		Some source tables were distributed as TSV. Since our chosen import workflow relied on CSV ingestion through MySQL Workbench, we first converted TSV files into CSV while preserving headers, delimiters, and quoting rules. We validated a small sample after conversion to ensure no column shifts occurred (especially for text fields containing special characters).
+		
+		\item \textbf{Renaming columns for query-compatibility and consistency.}
+		After initial imports, we discovered that several automatically generated column names were inconvenient for downstream SQL (e.g., spaces/special characters, overly long names, or ambiguous names shared across tables). We therefore standardized column naming (consistent snake\_case style) and updated the schema accordingly so that multi-table joins and query writing became straightforward and less error-prone.
+		
+		\item \textbf{Large file limitation when importing the variants table.}
+		The variants dataset was very large (on the order of hundreds of MB). During import, MySQL/Workbench constraints on file size prevented loading the full file in a single step. To proceed, we reduced the dataset to a manageable subset that fits the import constraints (while keeping the schema identical), enabling physical construction, constraint application, and testing queries to run successfully.
+		
+		\item \textbf{Conceptual vs. practical linkage: GEO2R to Genes.}
+		In the Report~1 ERD, we planned to connect \texttt{GEO2R\_Results} to \texttt{Genes} via HGNC gene symbols, which is conceptually reasonable. However, in practice, the available GEO2R outputs and the BioMart-derived gene identifiers did not provide a clean, complete overlap for reliable joining because the tables were produced from different sources/pipelines. This highlighted an important integration lesson: even when two tables share a ``similar'' identifier type in principle, cross-source datasets can differ in coverage and formatting, so link feasibility must be validated empirically early. As a result, we treated this join carefully during constraint definition and testing, and documented the limitation in the physical design discussion.
+	\end{enumerate}
 \end{document}
