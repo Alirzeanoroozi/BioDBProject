@@ -1,0 +1,13 @@
+Table,"Create Table"
+Transcript,"CREATE TABLE `Transcript` (
+  `refseq_id` text DEFAULT NULL,
+  `chrom` text DEFAULT NULL,
+  `strand` text DEFAULT NULL,
+  `txStart` int(11) DEFAULT NULL,
+  `txEnd` int(11) DEFAULT NULL,
+  `exonCount` int(11) DEFAULT NULL,
+  `exonStarts` text DEFAULT NULL,
+  `exonEnds` text DEFAULT NULL,
+  `score` int(11) DEFAULT NULL,
+  `name2` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"

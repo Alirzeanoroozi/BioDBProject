@@ -1,0 +1,12 @@
+Table,"Create Table"
+geo2r,"CREATE TABLE `geo2r` (
+  `geo_id` text DEFAULT NULL,
+  `gene_symbol` varchar(500) DEFAULT NULL,
+  `logFC` double DEFAULT NULL,
+  `p_value` double DEFAULT NULL,
+  `adj_p_value` double DEFAULT NULL,
+  `t_stat` double DEFAULT NULL,
+  `regulation` text DEFAULT NULL,
+  KEY `gene_symbol__idx` (`gene_symbol`),
+  KEY `gene_symbol_new__idx` (`gene_symbol`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"

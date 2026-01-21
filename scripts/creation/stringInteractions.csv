@@ -1,0 +1,16 @@
+Table,"Create Table"
+StringInteractions,"CREATE TABLE `StringInteractions` (
+  `#node1` text DEFAULT NULL,
+  `node2` text DEFAULT NULL,
+  `node1_string_id` text DEFAULT NULL,
+  `node2_string_id` text DEFAULT NULL,
+  `neighborhood_on_chromosome` double DEFAULT NULL,
+  `gene_fusion` double DEFAULT NULL,
+  `phylogenetic_cooccurrence` double DEFAULT NULL,
+  `homology` double DEFAULT NULL,
+  `coexpression` double DEFAULT NULL,
+  `experimentally_determined_interaction` double DEFAULT NULL,
+  `database_annotated` double DEFAULT NULL,
+  `automated_textmining` double DEFAULT NULL,
+  `combined_score` double DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"

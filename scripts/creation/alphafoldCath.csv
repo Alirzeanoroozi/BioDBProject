@@ -1,0 +1,26 @@
+Table,"Create Table"
+alphafoldcath,"CREATE TABLE `alphafoldcath` (
+  `Alphafold` text DEFAULT NULL,
+  `ted_id` text DEFAULT NULL,
+  `uniprot_acc` text DEFAULT NULL,
+  `md5_domain` text DEFAULT NULL,
+  `consensus_level` text DEFAULT NULL,
+  `chopping` text DEFAULT NULL,
+  `nres_domain` int(11) DEFAULT NULL,
+  `num_segments` int(11) DEFAULT NULL,
+  `plddt` double DEFAULT NULL,
+  `num_helix_strand_turn` int(11) DEFAULT NULL,
+  `num_helix` int(11) DEFAULT NULL,
+  `num_strand` int(11) DEFAULT NULL,
+  `num_helix_strand` int(11) DEFAULT NULL,
+  `num_turn` int(11) DEFAULT NULL,
+  `proteome_id` int(11) DEFAULT NULL,
+  `cath_label` text DEFAULT NULL,
+  `cath_assignment_level` text DEFAULT NULL,
+  `cath_assignment_method` text DEFAULT NULL,
+  `packing_density` double DEFAULT NULL,
+  `norm_rg` double DEFAULT NULL,
+  `tax_common_name` text DEFAULT NULL,
+  `tax_scientific_name` text DEFAULT NULL,
+  `tax_lineage` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"

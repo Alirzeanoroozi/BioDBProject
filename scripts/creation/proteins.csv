@@ -1,0 +1,19 @@
+Table,"Create Table"
+proteins,"CREATE TABLE `proteins` (
+  `ensmble_id` varchar(30) DEFAULT NULL,
+  `Entry` text DEFAULT NULL,
+  `Entry_Name` text DEFAULT NULL,
+  `Length` int(11) DEFAULT NULL,
+  `Protein names` text DEFAULT NULL,
+  `Gene Names` text DEFAULT NULL,
+  `PDB` text DEFAULT NULL,
+  `AlphaFoldDB` text DEFAULT NULL,
+  `Mass` int(11) DEFAULT NULL,
+  `Subcellular location [CC]` text DEFAULT NULL,
+  `Function [CC]` text DEFAULT NULL,
+  `Gene Ontology (biological process)` text DEFAULT NULL,
+  `InterPro` text DEFAULT NULL,
+  `Pfam` text DEFAULT NULL,
+  KEY `ensembel_idx` (`ensmble_id`),
+  CONSTRAINT `ensembel` FOREIGN KEY (`ensmble_id`) REFERENCES `genes` (`Gene_stable_ID`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"

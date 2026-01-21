@@ -1,0 +1,11 @@
+Table,"Create Table"
+variants,"CREATE TABLE `variants` (
+  `Gene_stable_ID` text DEFAULT NULL,
+  `Gene_Name` text DEFAULT NULL,
+  `Variant_name` text DEFAULT NULL,
+  `Chromosome/scaffold name` int(11) DEFAULT NULL,
+  `Chromosome/scaffold position start (bp)` int(11) DEFAULT NULL,
+  `Chromosome/scaffold position end (bp)` int(11) DEFAULT NULL,
+  `Variant alleles` text DEFAULT NULL,
+  `UCSC ID` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci"
